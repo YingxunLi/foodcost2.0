@@ -290,9 +290,10 @@ body {
 .main-title {
     font-size: 30px;
     font-weight: 700;
-    color: #FD96B3;
+    color: #6B7C8D;
     letter-spacing: -1px;
-    margin-bottom: 10px;
+    margin-top: 24px;
+    margin-bottom: 12px;
     margin-left: 0;
     text-align: left;
     line-height: 1.1;

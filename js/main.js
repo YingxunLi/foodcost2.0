@@ -1,6 +1,6 @@
 let stageHeight;
 let stageWidth;
-const margin = { top: 130, right: 80, bottom: 100, left: 80 }; 
+const margin = { top: 150, right: 80, bottom: 88, left: 80 }; 
 
 // ----------- Checkbox ----------- 
 const fields = [
