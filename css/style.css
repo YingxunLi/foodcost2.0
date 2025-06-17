@@ -261,15 +261,18 @@ body {
 .overview-circle-green {
     position: absolute;
     border-radius: 50%;
-    background: #02947B;
-    opacity: 0.5;
+    /* background: #02947B;
+    opacity: 0.5; */
+    background: none;
     pointer-events: none;
 }
 .overview-circle-pink {
     position: absolute;
     border-radius: 50%;
-    background: #FD96B3;
-    opacity: 0.4;
+    /* background: #FD96B3;
+    opacity: 0.4; */
+        background: none;
+
     pointer-events: none;
 }
 .overview-circle-white {

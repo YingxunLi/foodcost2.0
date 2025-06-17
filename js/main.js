@@ -22,6 +22,9 @@ const topFields = [
   { key: "Vergleich", label: "Ratio" }
 ];
 
+// 新增：记录当前选中的食物类型
+let selectedFoodKey = null;
+
 // ----------- top-area ----------- 
 function renderTopArea(mode) {
   // mode: "bar" | "afford" | "overview"
@@ -284,6 +287,13 @@ function drawCountryCostChart(transitionMode) {
       let item = document.createElement("div");
       item.style.display = "flex";
       item.style.alignItems = "center";
+      item.style.cursor = "pointer";
+      // 高亮选中
+      if (selectedFoodKey === food.key) {
+        item.style.background = "rgba(253,150,179,0.15)";
+        item.style.borderRadius = "6px";
+        item.style.boxShadow = "0 0 0 2px #FD96B3";
+      }
       // 色块
       let colorBox = document.createElement("span");
       colorBox.style.display = "inline-block";
@@ -298,6 +308,17 @@ function drawCountryCostChart(transitionMode) {
       label.textContent = food.key;
       item.appendChild(label);
 
+      // 点击事件
+      item.onclick = () => {
+        // 再次点击已选中则取消选中
+        if (selectedFoodKey === food.key) {
+          selectedFoodKey = null;
+        } else {
+          selectedFoodKey = food.key;
+        }
+        drawCountryCostChart(); // 重新渲染
+      };
+
       legendArea.appendChild(item);
     });
 
@@ -306,6 +327,8 @@ function drawCountryCostChart(transitionMode) {
     // 非cost视图时移除legend
     let oldLegend = document.getElementById("food-legend-area");
     if (oldLegend) oldLegend.remove();
+    // 退出cost视图时清空选中
+    selectedFoodKey = null;
   }
 
   const data = [...jsonData].sort((a, b) => parseFloat(b.TagGNI) - parseFloat(a.TagGNI));
@@ -354,27 +377,44 @@ function drawCountryCostChart(transitionMode) {
       let yStack = margin.top + chartHeight;
       const xPos = margin.left + i * (barWidth + gap);
 
-      foodAverages.forEach((food, idx) => {
-        const value = parseFloat(country[food.key]);
-        const barHeight = gmynd.map(value, 0, maxCost, 0, chartHeight);
+      // 如果有选中某个食物类型，只渲染灰色底bar和该食物类型的bar
+      if (selectedFoodKey) {
+        // 1. 灰色底bar（总cost）
+        let total = parseFloat(country["Cost"]);
+        let totalBarHeight = gmynd.map(total, 0, maxCost, 0, chartHeight);
+        let totalBarTop = margin.top + (chartHeight - totalBarHeight);
+        let bgBar = document.createElement("div");
+        bgBar.className = "bar cost-background";
+        bgBar.style.position = "absolute";
+        bgBar.style.left = `${xPos}px`;
+        bgBar.style.top = `${totalBarTop}px`;
+        bgBar.style.width = `${barWidth}px`;
+        bgBar.style.height = `${totalBarHeight}px`;
+        bgBar.style.background = "#eee";
+        bgBar.style.transition = "height 0.5s, top 0.5s";
+        document.querySelector("#renderer").appendChild(bgBar);
 
-        yStack -= barHeight;
-
+        // 2. 选中食物类型的bar（粉色）
+        let idx = foodAverages.findIndex(f => f.key === selectedFoodKey);
+        let value = parseFloat(country[selectedFoodKey]);
+        let barHeight = gmynd.map(value, 0, maxCost, 0, chartHeight);
+        let barTop = margin.top + (chartHeight - barHeight);
         let seg = document.createElement("div");
         seg.className = "bar food-segment";
         seg.style.position = "absolute";
         seg.style.left = `${xPos}px`;
-        seg.style.top = `${yStack}px`;
+        seg.style.top = `${barTop}px`;
         seg.style.width = `${barWidth}px`;
         seg.style.height = `${barHeight}px`;
-        seg.style.background = `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`;
-        seg.title = `${food.key}: $${value.toFixed(2)}`;
+        seg.style.background = `rgba(253,150,179,${alphas[idx]})`;
+        seg.style.transition = "height 0.5s, top 0.5s";
+        seg.title = `${selectedFoodKey}: $${value.toFixed(2)}`;
 
-        // 添加tooltip交互
+        // tooltip
         seg.addEventListener("mouseenter", (event) => {
           tooltip.innerHTML = `
             <b>${country["Country Name"]}</b><br>
-            ${food.key}: $${value.toFixed(2)}
+            ${selectedFoodKey}: $${value.toFixed(2)}
           `;
           tooltip.style.display = "block";
           tooltip.style.left = `${event.clientX + 10}px`;
@@ -389,7 +429,46 @@ function drawCountryCostChart(transitionMode) {
         });
 
         document.querySelector("#renderer").appendChild(seg);
-      });
+      } else {
+        // 没有选中，正常堆叠渲染全部
+        foodAverages.forEach((food, idx) => {
+          const value = parseFloat(country[food.key]);
+          const barHeight = gmynd.map(value, 0, maxCost, 0, chartHeight);
+
+          yStack -= barHeight;
+
+          let seg = document.createElement("div");
+          seg.className = "bar food-segment";
+          seg.style.position = "absolute";
+          seg.style.left = `${xPos}px`;
+          seg.style.top = `${yStack}px`;
+          seg.style.width = `${barWidth}px`;
+          seg.style.height = `${barHeight}px`;
+          seg.style.background = `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`;
+          seg.style.transition = "height 0.5s, top 0.5s";
+          seg.title = `${food.key}: $${value.toFixed(2)}`;
+
+          // 添加tooltip交互
+          seg.addEventListener("mouseenter", (event) => {
+            tooltip.innerHTML = `
+              <b>${country["Country Name"]}</b><br>
+              ${food.key}: $${value.toFixed(2)}
+            `;
+            tooltip.style.display = "block";
+            tooltip.style.left = `${event.clientX + 10}px`;
+            tooltip.style.top = `${event.clientY + 10}px`;
+          });
+          seg.addEventListener("mousemove", (event) => {
+            tooltip.style.left = `${event.clientX + 10}px`;
+            tooltip.style.top = `${event.clientY + 10}px`;
+          });
+          seg.addEventListener("mouseleave", () => {
+            tooltip.style.display = "none";
+          });
+
+          document.querySelector("#renderer").appendChild(seg);
+        });
+      }
     });
     return;
   }
@@ -795,10 +874,11 @@ function drawCountryCostChart(transitionMode) {
 
 // ----------- Affordability ----------- 
 function barToScatterUltraSmoothTransition() {
-  // checkbox entfernen
   document.querySelector("#renderer").innerHTML = "";
-  let oldArea = document.getElementById("checkbox-area");
-  if (oldArea) oldArea.remove();
+
+  // unter weg
+  let oldLegend = document.getElementById("food-legend-area");
+  if (oldLegend) oldLegend.remove();
 
   // neue buttons erstellen
   const scatterFields = [
@@ -1142,6 +1222,11 @@ for (let i = 0; i <= yTicks; i++) {
 function drawOverviewChart() {
   document.querySelector("#renderer").innerHTML = "";
     
+  // unter weg
+  let oldLegend = document.getElementById("food-legend-area");
+  if (oldLegend) oldLegend.remove();
+
+
   const chartWidth = stageWidth - margin.left - margin.right;
   const chartHeight = stageHeight - margin.top - margin.bottom;
 
@@ -1154,37 +1239,35 @@ function drawOverviewChart() {
   const minUnter = Math.min(...data.map(d => parseFloat(d["Unterernährung"])));
   const maxUnter = Math.max(...data.map(d => parseFloat(d["Unterernährung"])));
 
-    const minCostArea = Math.PI * 50 * 50;
-  const maxCostArea = Math.PI * 160 * 160;
+  const minCostArea = Math.PI * 80 * 80;
+  const maxCostArea = Math.PI * 200 * 200;
   const minIncomeArea = Math.PI * 80 * 80;
   const maxIncomeArea = Math.PI * 200 * 200;
   const minUnterArea = Math.PI * 10 * 10;
-  const maxUnterArea = Math.PI * 30 * 30;
+  const maxUnterArea = Math.PI * 60 * 60;
 
   // Position
   const nodes = data.map((country, i) => {
     const cost = parseFloat(country.Cost);
     const income = parseFloat(country.TagGNI);
     const unter = parseFloat(country.Unterernährung);
-    const ratio = parseFloat(country.Vergleich);
-    
+
+    // const difference = income - cost;
+    // const mindifference = Math.min(...data.map(d => parseFloat(d.TagGNI) - parseFloat(d.Cost)));
+    // const maxdifference = Math.max(...data.map(d => parseFloat(d.TagGNI) - parseFloat(d.Cost)));
+
+
     // original radius calculation
     let rCost = Math.sqrt(gmynd.map(cost, minCost, maxCost, minCostArea, maxCostArea) / Math.PI);
     let rIncome = Math.sqrt(gmynd.map(income, minIncome, maxIncome, minIncomeArea, maxIncomeArea) / Math.PI);
     let rUnter = Math.sqrt(gmynd.map(unter, minUnter, maxUnter, minUnterArea, maxUnterArea) / Math.PI);
 
     // garantieren, dass der Bodenkreis größer ist
-    if (ratio > 50 && rCost <= rIncome) {
-      [rCost, rIncome] = [Math.max(rCost, rIncome + 8), Math.min(rCost - 8, rIncome)];
-    } else if (ratio < 50 && rIncome <= rCost) {
-      [rIncome, rCost] = [Math.max(rIncome, rCost + 8), Math.min(rIncome - 8, rCost)];
-
-    } // 8 kann verändert werden, um den Abstand zu erhöhen
-
-    // X Y Achse
-    // const xBase = gmynd.map(income, minIncome, maxIncome, margin.left, margin.left + chartWidth);
-    // const x = xBase + (Math.random() - 0.5) * 40; //40可以 verandert werden, um die Streuung zu erhöhen
-    // const y = margin.top + Math.random() * chartHeight;
+    // if (ratio > 50 && rCost <= rIncome) {
+    //   [rCost, rIncome] = [Math.max(rCost, rIncome + 8), Math.min(rCost - 8, rIncome)];
+    // } else if (ratio < 50 && rIncome <= rCost) {
+    //   [rIncome, rCost] = [Math.max(rIncome, rCost + 8), Math.min(rIncome - 8, rCost)];
+    // } 
 
     // //log
     const logMinIncome = Math.log10(minIncome);
@@ -1195,13 +1278,6 @@ function drawOverviewChart() {
 
     return {
       country,
-      // rCost: gmynd.map(cost, minCost, maxCost, 50, 160),
-      // rIncome: gmynd.map(income, minIncome, maxIncome, 80, 200),
-      // rUnter: gmynd.map(unter, minUnter, maxUnter, 10, 30),
-      
-      // rCost: Math.sqrt(gmynd.map(cost, minCost, maxCost, minCostArea, maxCostArea) / Math.PI),
-      // rIncome: Math.sqrt(gmynd.map(income, minIncome, maxIncome, minIncomeArea, maxIncomeArea) / Math.PI),
-      // rUnter: Math.sqrt(gmynd.map(unter, minUnter, maxUnter, minUnterArea, maxUnterArea) / Math.PI),
       rCost,
       rIncome,
       rUnter,
@@ -1213,6 +1289,12 @@ function drawOverviewChart() {
       //y: margin.top + Math.random() * chartHeight
     };
   });
+
+  // 统一计算 difference
+const differences = nodes.map(n => Math.abs(n.rIncome - n.rCost));
+const mindifference = Math.min(...differences);
+const maxdifference = Math.max(...differences);
+
 
   // Vermeidung von Überlappungen durch Kraftfeldsimulation
   function simulate(nodes, iterations = 300) {
@@ -1250,16 +1332,24 @@ function drawOverviewChart() {
 
   // Kreise
   nodes.forEach(node => {
-    const d = node.country;
-    const ratio = parseFloat(d.Vergleich);
+    let difference = Math.abs(node.rIncome - node.rCost);
+    node.border = gmynd.map(
+    Math.sqrt(Math.max(0, difference)),
+    Math.sqrt(Math.max(0, mindifference)),
+    Math.sqrt(Math.max(0, maxdifference)),
+    5, 50
+  );
 
-    // Group Container
-    let group = document.createElement("div");
-    group.style.position = "absolute";
-    group.style.left = `${node.x}px`;
-    group.style.top = `${node.y}px`;
-    group.style.transform = "translate(-50%, -50%)";
-    group.style.cursor = "pointer";
+  const d = node.country;
+  const ratio = parseFloat(d.Vergleich);
+
+  // Group Container
+  let group = document.createElement("div");
+  group.style.position = "absolute";
+  group.style.left = `${node.x}px`;
+  group.style.top = `${node.y}px`;
+  group.style.transform = "translate(-50%, -50%)";
+  group.style.cursor = "pointer";
     group.style.width = `${node.rIncome * 1.1}px`;
     group.style.height = `${node.rIncome * 1.1}px`;
 
@@ -1270,14 +1360,9 @@ function drawOverviewChart() {
       incomeCircle.style.width = incomeCircle.style.height = `${node.rIncome}px`;
       incomeCircle.style.left = incomeCircle.style.top = "50%";
       incomeCircle.style.transform = "translate(-50%, -50%)";
+      incomeCircle.style.border = `${node.border}px solid #02947B`;
+      incomeCircle.style.opacity = "0.5";
       group.appendChild(incomeCircle);
-
-      let costCircle = document.createElement("div");
-      costCircle.className = "overview-circle-white";
-      costCircle.style.width = costCircle.style.height = `${node.rCost}px`;
-      costCircle.style.left = costCircle.style.top = "50%";
-      costCircle.style.transform = "translate(-50%, -50%)";
-      group.appendChild(costCircle);
     } else {
       // income < cost, zeichen cost Kreis vor income Kreis
       let costCircle = document.createElement("div");
@@ -1285,14 +1370,9 @@ function drawOverviewChart() {
       costCircle.style.width = costCircle.style.height = `${node.rCost}px`;
       costCircle.style.left = costCircle.style.top = "50%";
       costCircle.style.transform = "translate(-50%, -50%)";
+      costCircle.style.border = `${node.border}px solid #FD96B3`;
+      costCircle.style.opacity = "0.4";
       group.appendChild(costCircle);
-
-      let incomeCircle = document.createElement("div");
-      incomeCircle.style.width = incomeCircle.style.height = `${node.rIncome}px`;
-      incomeCircle.className = "overview-circle-white";
-      incomeCircle.style.left = incomeCircle.style.top = "50%";
-      incomeCircle.style.transform = "translate(-50%, -50%)";
-      group.appendChild(incomeCircle);
     }
 
     // Unterernährung
