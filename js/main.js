@@ -737,7 +737,8 @@ const alphas = foodAverages.map((_, i) =>
       document.querySelector("#renderer").appendChild(barCost);
       bars.push(barIncome, barCost);
     } else if (["Cost", "Vergleich"].includes(currentField)) {
-      // Ratio-Seite: zuerst grauer背景balken (100%), 然后 rosa Balken (tatsächliches Verhältnis)
+      // Ratio-Seite: zuerst grauer背景balken (100%),
+      // 然后 rosa Balken (tatsächliches Verhältnis)
       if (currentField === "Vergleich") {
         // Grauer Hintergrundbalken (100%)
         let barBg = document.createElement("div");
@@ -894,7 +895,7 @@ function barToScatterUltraSmoothTransition() {
   const minR = Math.min(...data.map(d => parseFloat(d[rField])));
   const maxR = Math.max(...data.map(d => parseFloat(d[rField])));
 
-// X轴刻度点和数字
+  // X轴刻度点和数字
 const xTicks = 5;
 for (let i = 0; i <= xTicks; i++) {
   const t = i / xTicks;
@@ -1025,33 +1026,20 @@ for (let i = 0; i <= yTicks; i++) {
     data.forEach((country, i) => {
       let bar = barDots[i];
       bar.onmouseenter = () => {
-  document.querySelectorAll(".axis-x-tick").forEach(e => e.style.display = "");
-  document.querySelectorAll(".axis-x-tick-label").forEach(e => e.style.display = "");
-  document.querySelectorAll(".axis-y-tick").forEach(e => e.style.display = "");
-  document.querySelectorAll(".axis-y-tick-label").forEach(e => e.style.display = "");
+        // ...existing code...
 
-        bar.classList.add("active");
-        let rLabel = "";
-        if (rField === "Vergleich") rLabel = `Ratio: ${country["Vergleich"]}%`;
-        else if (rField === "Percent cannot afford") rLabel = `Unaffordability: ${country["Percent cannot afford"]}%`;
-        else if (rField === "Unterernährung") rLabel = `Malnutrition: ${country["Unterernährung"]}%`;
-        tooltip.innerText = `${country["Country Name"]}\nIncome: $${country["TagGNI"]}\nCost: $${country["Cost"]}\n${rLabel}`;
-        tooltip.style.display = "block";
-        tooltip.style.left = `${bar.getBoundingClientRect().right + 10}px`;
-        tooltip.style.top = `${bar.getBoundingClientRect().top}px`;
+        // ====== 新增：辅助线和标注 ======
+        drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY);
       };
       bar.onmousemove = () => {
         tooltip.style.left = `${bar.getBoundingClientRect().right + 10}px`;
         tooltip.style.top = `${bar.getBoundingClientRect().top}px`;
       };
       bar.onmouseleave = () => {
-  document.querySelectorAll(".axis-x-tick").forEach(e => e.style.display = "none");
-  document.querySelectorAll(".axis-x-tick-label").forEach(e => e.style.display = "none");
-  document.querySelectorAll(".axis-y-tick").forEach(e => e.style.display = "none");
-  document.querySelectorAll(".axis-y-tick-label").forEach(e => e.style.display = "none");
+        // ...existing code...
 
-        bar.classList.remove("active");
-        tooltip.style.display = "none";
+        // ====== 新增：移除辅助线和标注 ======
+        removeScatterHoverLines();
       };
     });
 
@@ -1113,15 +1101,10 @@ for (let i = 0; i <= yTicks; i++) {
   data.forEach((country, i) => {
     let bar = dots[i].dot;
     bar.onmouseenter = () => {
-      bar.style.opacity = "1";
-      let rLabel = "";
-      if (rField === "Vergleich") rLabel = `Ratio: ${country["Vergleich"]}%`;
-      else if (rField === "Percent cannot afford") rLabel = `Unaffordability: ${country["Percent cannot afford"]}%`;
-      else if (rField === "Unterernährung") rLabel = `Malnutrition: ${country["Unterernährung"]}%`;
-      tooltip.innerText = `${country["Country Name"]}\nIncome: $${country["TagGNI"]}\nCost: $${country["Cost"]}\n${rLabel}`;
-      tooltip.style.display = "block";
-      tooltip.style.left = `${bar.getBoundingClientRect().right + 10}px`;
-      tooltip.style.top = `${bar.getBoundingClientRect().top}px`;
+      // ...existing code...
+
+      // ====== 新增：辅助线和标注 ======
+      drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY);
     };
     bar.onmousemove = () => {
       tooltip.style.left = `${bar.getBoundingClientRect().right + 10}px`;
@@ -1130,6 +1113,8 @@ for (let i = 0; i <= yTicks; i++) {
     bar.onmouseleave = () => {
       bar.style.opacity = "0.8";
       tooltip.style.display = "none";
+      // ====== 新增：移除辅助线和标注 ======
+      removeScatterHoverLines();
     };
   });
 
@@ -1150,6 +1135,159 @@ for (let i = 0; i <= yTicks; i++) {
   }
 }
 
+// ====== 新增：辅助线和标注函数 ======
+function drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY) {
+  // 计算圆心坐标
+  const logMinX = Math.log10(minX);
+  const logMaxX = Math.log10(maxX);
+  const logMinY = Math.log10(minY);
+  const logMaxY = Math.log10(maxY);
+  const x = gmynd.map(Math.log10(parseFloat(country["TagGNI"])), logMinX, logMaxX, 0, chartWidth);
+  const y = gmynd.map(Math.log10(parseFloat(country["Cost"])), logMinY, logMaxY, chartHeight, 0);
+
+  // 先移除之前的轴点、数字和连线
+  removeScatterHoverAxes();
+
+  // X轴刻度点和数字
+  const xTicks = 5;
+  for (let i = 0; i <= xTicks; i++) {
+    const t = i / xTicks;
+    const logVal = logMinX + t * (logMaxX - logMinX);
+    const val = Math.pow(10, logVal);
+    const xx = gmynd.map(logVal, logMinX, logMaxX, 0, chartWidth);
+
+    // 刻度点
+    let tick = document.createElement("div");
+    tick.className = "axis-x-tick scatter-hover-tick";
+    tick.style.position = "absolute";
+    tick.style.left = `${margin.left + xx - 3}px`;
+    tick.style.top = `${margin.top + chartHeight - 3 + 2}px`;
+    tick.style.width = "6px";
+    tick.style.height = "6px";
+    tick.style.borderRadius = "50%";
+    tick.style.background = "#bbb";
+    document.querySelector("#renderer").appendChild(tick);
+
+    // 刻度数字
+    let label = document.createElement("div");
+    label.className = "axis-x-tick-label scatter-hover-tick";
+    label.style.position = "absolute";
+    label.style.left = `${margin.left + xx - 15}px`;
+    label.style.top = `${margin.top + chartHeight + 10}px`;
+    label.style.color = "#6B7C8D";
+    label.style.fontSize = "12px";
+    label.textContent = val >= 1000 ? Math.round(val) : val.toFixed(1);
+    document.querySelector("#renderer").appendChild(label);
+  }
+
+  // Y轴刻度点和数字
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const t = i / yTicks;
+    const logVal = logMinY + t * (logMaxY - logMinY);
+    const val = Math.pow(10, logVal);
+    const yy = gmynd.map(logVal, logMinY, logMaxY, chartHeight, 0);
+
+    // 刻度点
+    let tick = document.createElement("div");
+    tick.className = "axis-y-tick scatter-hover-tick";
+    tick.style.position = "absolute";
+    tick.style.left = `${margin.left - 6}px`;
+    tick.style.top = `${margin.top + yy - 3}px`;
+    tick.style.width = "6px";
+    tick.style.height = "6px";
+    tick.style.borderRadius = "50%";
+    tick.style.background = "#bbb";
+    document.querySelector("#renderer").appendChild(tick);
+
+    // 刻度数字
+    let label = document.createElement("div");
+    label.className = "axis-y-tick-label scatter-hover-tick";
+    label.style.position = "absolute";
+    label.style.left = `${margin.left - 45}px`;
+    label.style.top = `${margin.top + yy - 8}px`;
+    label.style.color = "#6B7C8D";
+    label.style.fontSize = "12px";
+    label.textContent = val >= 1000 ? Math.round(val) : val.toFixed(1);
+    document.querySelector("#renderer").appendChild(label);
+  }
+
+  // 连线
+  // 垂直线（粉色，income->x轴）
+  let vLine = document.createElement("div");
+  vLine.id = "scatter-hover-vline";
+  vLine.style.position = "absolute";
+  vLine.style.left = `${margin.left + x}px`;
+  vLine.style.top = `${margin.top + y}px`;
+  vLine.style.width = "2px";
+  vLine.style.height = `${chartHeight - y}px`;
+  vLine.style.background = "repeating-linear-gradient(90deg,#E1E5E8 0 6px,transparent 6px 12px)";
+  vLine.style.zIndex = 1000;
+  document.querySelector("#renderer").appendChild(vLine);
+
+  // 水平线（灰色虚线，cost->y轴）
+  let hLine = document.createElement("div");
+  hLine.id = "scatter-hover-hline";
+  hLine.style.position = "absolute";
+  hLine.style.left = `${margin.left}px`;
+  hLine.style.top = `${margin.top + y}px`;
+  hLine.style.width = `${x}px`;
+  hLine.style.height = "2px";
+  hLine.style.background = "repeating-linear-gradient(90deg,#E1E5E8 0 6px,transparent 6px 12px)";
+  hLine.style.opacity = "0.7";
+  hLine.style.zIndex = 1000;
+  document.querySelector("#renderer").appendChild(hLine);
+
+  // x轴数值标注
+  let xLabel = document.createElement("div");
+  xLabel.id = "scatter-hover-xlabel";
+  xLabel.style.position = "absolute";
+  xLabel.style.left = `${margin.left + x - 30}px`;
+  xLabel.style.top = `${margin.top + chartHeight + 22}px`;
+  xLabel.style.color = "#FD96B3";
+  xLabel.style.fontWeight = "bold";
+  xLabel.style.fontSize = "13px";
+  xLabel.style.background = "#fff";
+  xLabel.style.padding = "2px 6px";
+  xLabel.style.borderRadius = "4px";
+  xLabel.style.boxShadow = "0 1px 4px rgba(0,0,0,0.04)";
+  xLabel.style.zIndex = 1001;
+  xLabel.textContent = `Income: $${country["TagGNI"]}`;
+  document.querySelector("#renderer").appendChild(xLabel);
+
+  // y轴数值标注
+  let yLabel = document.createElement("div");
+  yLabel.id = "scatter-hover-ylabel";
+  yLabel.style.position = "absolute";
+  yLabel.style.left = `${margin.left - 60}px`;
+  yLabel.style.top = `${margin.top + y - 12}px`;
+  yLabel.style.color = "#FD96B3";
+  yLabel.style.fontWeight = "bold";
+  yLabel.style.fontSize = "13px";
+  yLabel.style.background = "#fff";
+  yLabel.style.padding = "2px 6px";
+  yLabel.style.borderRadius = "4px";
+  yLabel.style.boxShadow = "0 1px 4px rgba(0,0,0,0.04)";
+  yLabel.style.zIndex = 1001;
+  yLabel.textContent = `Cost: $${country["Cost"]}`;
+  document.querySelector("#renderer").appendChild(yLabel);
+}
+
+function removeScatterHoverAxes() {
+  document.querySelectorAll(".scatter-hover-tick").forEach(e => e.remove());
+  let vLine = document.getElementById("scatter-hover-vline");
+  if (vLine) vLine.remove();
+  let hLine = document.getElementById("scatter-hover-hline");
+  if (hLine) hLine.remove();
+}
+
+function removeScatterHoverLines() {
+  removeScatterHoverAxes();
+  ["scatter-hover-xlabel", "scatter-hover-ylabel"].forEach(id => {
+    let el = document.getElementById(id);
+    if (el) el.remove();
+  });
+}
 
 // ----------- Overview Chart ----------- 
 function drawOverviewChart() {
@@ -1195,7 +1333,7 @@ function drawOverviewChart() {
     let rIncome = Math.sqrt(gmynd.map(income, minIncome, maxIncome, minIncomeArea, maxIncomeArea) / Math.PI);
     let rUnter = Math.sqrt(gmynd.map(unter, minUnter, maxUnter, minUnterArea, maxUnterArea) / Math.PI);
 
-    // garantieren, dass der Bodenkreis größer ist
+    // garantieren, dass der Bodenkreis größer是
     // if (ratio > 50 && rCost <= rIncome) {
     //   [rCost, rIncome] = [Math.max(rCost, rIncome + 8), Math.min(rCost - 8, rIncome)];
     // } else if (ratio < 50 && rIncome <= rCost) {
