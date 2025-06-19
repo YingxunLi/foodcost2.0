@@ -1,21 +1,20 @@
-* {
-
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-}
-
 html, body {
     height: 100%;
     width: 100%;
     /* overflow: hidden; */
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+* {
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
 body {
     background-color: rgb(39, 39, 39);
     color: white;
-    font-family: 'Poppins';
-
 }
 
 #renderer {
@@ -32,15 +31,12 @@ body {
     top: 30px;
     height: 60px;
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
-    align-items: center;
+    /* align-items: center; */
+    align-items: flex-start;
     z-index: 20;
     pointer-events: auto;
-}
-
-#top-area > div:last-child {
-    display: flex;
-    gap: 24px;
 }
 
 #top-area > div:first-child {
@@ -48,7 +44,35 @@ body {
     align-items: center;
 }
 
-/* ----------- Top Button (link & recht) -----------  */
+/* ----------- title -----------  */
+.main-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #6B7C8D;
+    letter-spacing: -1px;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    margin-left: 0;
+    text-align: left;
+    line-height: 1.1;
+}
+/* -----------  Button container -----------  */
+.right-area {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+.left-area {
+  display: flex;
+  gap: 12px;
+}
+.btn-row {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .top-btn {
     font-size: 15px;
     padding: 6px 18px;
@@ -77,30 +101,31 @@ body {
     color: #fff;
 }
 
+/* 合并 main/affordability/overview 样式 */
 .top-btn.main,
 .top-btn.affordability,
 .top-btn.overview {
     font-size: 20px;
     padding: 4px 0px;
     margin-left: 0px;
-    background: #FFFFFF;
+    background: transparent;
     color: #6B7C8D;
     font-weight: bold;
     transition: background 0.2s, color 0.2s;
 }
 
+/* 单独 main 的 margin-left */
 .top-btn.main {
     margin-left: 0px;
-    font-weight: bold;
-    background: transparent;
 }
+
+/* afford/overview 的 margin-left */
 .top-btn.affordability,
 .top-btn.overview {
     margin-left: 30px;
-    font-weight: bold;
-    background: transparent;
 }
 
+/* 合并 inactive 状态 */
 .top-btn.main.inactive,
 .top-btn.affordability.inactive,
 .top-btn.overview.inactive {
@@ -108,6 +133,7 @@ body {
     color: #E1E5E8;
 }
 
+/* 合并 active/hover 状态 */
 .top-btn.main:active,
 .top-btn.affordability:active,
 .top-btn.overview:active,
@@ -286,19 +312,4 @@ body {
     border-radius: 50%;
     background: #E1E5E8;
     pointer-events: none;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
-
-.main-title {
-    font-size: 30px;
-    font-weight: 700;
-    color: #6B7C8D;
-    letter-spacing: -1px;
-    margin-top: 24px;
-    margin-bottom: 12px;
-    margin-left: 0;
-    text-align: left;
-    line-height: 1.1;
-    /* 可根据需要微调 */
 }

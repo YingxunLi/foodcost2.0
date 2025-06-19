@@ -1,10 +1,10 @@
 let stageHeight;
 let stageWidth;
-const margin = { top: 150, right: 80, bottom: 88, left: 80 }; 
+const margin = { top: 176, right: 80, bottom: 88, left: 80 }; 
 
 // ----------- Checkbox ----------- 
 const fields = [
-  { key: "Cost", label: "Total Cost" },
+  { key: "TotalCost", label: "Total Cost" }, 
   { key: "Fruits", label: "Fruits" },
   { key: "Vegetables", label: "Vegetables" },
   { key: "Starchy Staples", label: "Starchy Staples" },
@@ -12,22 +12,22 @@ const fields = [
   { key: "Nuts", label: "Nuts" },
   { key: "Oils and Fats", label: "Oils and Fats" }
 ];
-let currentField = "Cost";
-let currentTopField = "Cost";
-let currentPage = "bar"; // "bar" | "afford" | "overview"
 
+// ----------- recht Button ----------- 
 const topFields = [
   { key: "Cost", label: "Cost" },
   { key: "TagGNI", label: "Income" },
   { key: "Vergleich", label: "Ratio" }
 ];
 
-// 新增：记录当前选中的食物类型
+// ----------- ⚠️ current ----------- 
+let currentPage = "bar"; // "bar" | "afford" | "overview"
+let currentTopField = "Cost"; // "Cost" | "TagGNI" | "Vergleich" -- button
+let currentField = "Cost"; // "Cost" | "TagGNI" | "Vergleich" -- diagram
 let selectedFoodKey = null;
 
-// ----------- top-area ----------- 
+// ----------- render mode ----------- 
 function renderTopArea(mode) {
-  // mode: "bar" | "afford" | "overview"
   let renderer = document.querySelector('#renderer');
   stageWidth = renderer.clientWidth;
   stageHeight = renderer.clientHeight;
@@ -40,63 +40,43 @@ function renderTopArea(mode) {
   topArea.id = "top-area";
   topArea.style.left = `${margin.left}px`;
   topArea.style.width = `${stageWidth - margin.left - margin.right}px`;
-  topArea.style.display = "flex";
-  topArea.style.flexDirection = "column"; // 竖排，主标题在上
-  topArea.style.justifyContent = "flex-start";
-  topArea.style.alignItems = "flex-start";
 
-  // 主标题
+  // main title
   let mainTitle = document.createElement("div");
   mainTitle.className = "main-title";
   mainTitle.textContent = "Can Everyone Afford to Eat Healthy?";
   topArea.appendChild(mainTitle);
 
-  // 按钮行
+  // left & right button container
   let btnRow = document.createElement("div");
-  btnRow.style.display = "flex";
-  btnRow.style.width = "100%";
-  btnRow.style.justifyContent = "space-between";
-  btnRow.style.alignItems = "center";
+  btnRow.className = "btn-row";
 
-  // 左侧主按钮
+  // left button container
   let leftArea = document.createElement("div");
-  leftArea.style.display = "flex";
-  leftArea.style.gap = "12px";
-
-  // Healthy Diet Cost
-  let title = document.createElement("button");
-  title.textContent = "Healthy Diet Cost";
-  title.classList.add("top-btn", "main");
-  if (mode === "bar") title.classList.add("active");
-  else title.classList.add("inactive");
-  title.onclick = () => switchPage("bar");
-  leftArea.appendChild(title);
-
-  // Affordability
-  let affordabilityBtn = document.createElement("button");
-  affordabilityBtn.textContent = "Affordability";
-  affordabilityBtn.classList.add("top-btn", "main", "affordability");
-  if (mode === "afford") affordabilityBtn.classList.add("active");
-  else affordabilityBtn.classList.add("inactive");
-  affordabilityBtn.onclick = () => switchPage("afford");
-  leftArea.appendChild(affordabilityBtn);
-
-  // Overview
-  let overviewBtn = document.createElement("button");
-  overviewBtn.textContent = "Overview";
-  overviewBtn.classList.add("top-btn", "main", "overview");
-  if (mode === "overview") overviewBtn.classList.add("active");
-  else overviewBtn.classList.add("inactive");
-  overviewBtn.onclick = () => switchPage("overview");
-  leftArea.appendChild(overviewBtn);
-
+  leftArea.className = "left-area";
+ 
+  // main button
+  const mainBtns = [
+    { key: "bar", label: "Healthy Diet Cost", class: ["top-btn", "main"] },
+    { key: "afford", label: "Affordability", class: ["top-btn", "main", "affordability"] },
+    { key: "overview", label: "Overview", class: ["top-btn", "main", "overview"] }
+  ];
+  mainBtns.forEach(btnConf => {
+    let btn = document.createElement("button");
+    btn.textContent = btnConf.label;
+    btnConf.class.forEach(c => btn.classList.add(c));
+    if (mode === btnConf.key) btn.classList.add("active");
+    else btn.classList.add("inactive");
+    btn.onclick = () => switchPage(btnConf.key);
+    leftArea.appendChild(btn);
+  });
   btnRow.appendChild(leftArea);
 
-  // 右侧选项按钮（仅 bar 页显示）
+  // right button container
+  let rightArea = document.createElement("div");
+  rightArea.className = "right-area";
+
   if (mode === "bar") {
-    let topOptions = document.createElement("div");
-    topOptions.style.display = "flex";
-    topOptions.style.gap = "12px";
     topFields.forEach(f => {
       let btn = document.createElement("button");
       btn.textContent = f.label;
@@ -108,41 +88,29 @@ function renderTopArea(mode) {
           currentTopField = f.key;
           currentField = f.key;
           renderTopArea("bar");
-          // 过渡动画
-          if (prevField === "Cost" && currentField === "TagGNI") {
-            drawCountryCostChart("costToIncome");
-          } else if (prevField === "Cost" && currentField === "Vergleich") {
-            drawCountryCostChart("costToRatio");
-          } else if (prevField === "TagGNI" && currentField === "Vergleich") {
-            drawCountryCostChart("incomeToRatio");
-          } else if (prevField === "Vergleich" && currentField === "Cost") {
-            drawCountryCostChart("ratioToCost");
-          } else if (prevField === "Vergleich" && currentField === "TagGNI") {
-            drawCountryCostChart("ratioToIncome");
-          } else if (prevField === "TagGNI" && currentField === "Cost") {
-            drawCountryCostChart("incomeToCost");
-          } else {
-            drawCountryCostChart();
-          }
+          // switch animation 
+          const transitionMap = {
+            "Cost-TagGNI": "costToIncome",
+            "Cost-Vergleich": "costToRatio",
+            "TagGNI-Vergleich": "incomeToRatio",
+            "Vergleich-Cost": "ratioToCost",
+            "Vergleich-TagGNI": "ratioToIncome",
+            "TagGNI-Cost": "incomeToCost"
+          };
+          const transitionKey = `${prevField}-${currentField}`;
+          drawCountryCostChart(transitionMap[transitionKey]);
         }
       };
-      topOptions.appendChild(btn);
+      rightArea.appendChild(btn);
     });
-    btnRow.appendChild(topOptions);
   }
 
-  // scatter 顶部按钮（仅 afford 页显示）
   if (mode === "afford") {
     const scatterFields = [
       { key: "Vergleich", label: "Ratio" },
       { key: "Percent cannot afford", label: "Unaffordability" },
       { key: "Unterernährung", label: "Malnutrition" }
     ];
-    let scatterTop = document.createElement("div");
-    scatterTop.style.display = "flex";
-    scatterTop.style.gap = "18px";
-    scatterTop.style.zIndex = "30";
-    scatterTop.id = "scatter-top-btns";
     let currentScatterField = barToScatterUltraSmoothTransition.currentScatterField || "Vergleich";
     scatterFields.forEach(f => {
       let btn = document.createElement("button");
@@ -158,20 +126,18 @@ function renderTopArea(mode) {
           barToScatterUltraSmoothTransition();
         }
       };
-      scatterTop.appendChild(btn);
+      rightArea.appendChild(btn);
     });
-    btnRow.appendChild(scatterTop);
   }
 
-  topArea.appendChild(btnRow);
-
-  // 挂载
+  btnRow.appendChild(leftArea);
+  btnRow.appendChild(rightArea);
+  topArea.appendChild(btnRow);  
   renderer.parentNode.appendChild(topArea);
 }
 
-// ----------- 统一页面切换入口 ----------- 
+// ----------- switch mode ----------- 
 function switchPage(mode) {
-  // mode: "bar" | "afford" | "overview"
   currentPage = mode;
   if (mode === "bar") {
     currentField = "Cost";
@@ -180,7 +146,7 @@ function switchPage(mode) {
     const dots = document.querySelectorAll(".bar-to-dot");
     if (dots.length > 0) {
       // 按 TagGNI 排序，和 bar 顺序一致
-      const data = [...jsonData].sort((a, b) => parseFloat(b.TagGNI) - parseFloat(a.TagGNI));
+      const data = getDataSortedByIncome();
       const chartWidth = stageWidth - margin.left - margin.right;
       const chartHeight = stageHeight - margin.top - margin.bottom;
       const gap = 6;
@@ -221,7 +187,11 @@ function switchPage(mode) {
   }
 }
 
-// ----------- 初始化入口 ----------- 
+let tooltip = document.createElement("div");
+tooltip.classList.add("tooltip");
+tooltip.style.display = "none";
+document.body.appendChild(tooltip);
+
 function init() {
   renderer = document.querySelector('#renderer');
   stageWidth = renderer.clientWidth;
@@ -232,9 +202,14 @@ function init() {
 // ----------- 文件末尾添加 -----------
 init();
 
-// ----------- healthy diet cost ----------- 
-function drawCountryCostChart(transitionMode) {
+// ----------- sortieren nach income ----------- 
+function getDataSortedByIncome() {
+  return [...jsonData].sort((a, b) => parseFloat(a.TagGNI) - parseFloat(b.TagGNI));
+}
 
+// ----------- healthy diet cost ----------- 
+
+function drawCountryCostChart(transitionMode) {
   let topOptions = document.querySelector("#top-area > div:last-child");
   if (topOptions) topOptions.style.display = "flex";
 
@@ -258,11 +233,10 @@ function drawCountryCostChart(transitionMode) {
     }));
     foodAverages.sort((a, b) => b.avg - a.avg);
 
-    const baseColor = [253, 150, 179];
-    const minAlpha = 0.10, maxAlpha = 1;
-    const alphas = foodAverages.map((_, i) =>
-      minAlpha + (maxAlpha - minAlpha) * (foodAverages.length - 1 - i) / (foodAverages.length - 1)
-    );
+    const baseColor = [253, 150, 179];    const minAlpha = 0.10, maxAlpha = 1;
+const alphas = foodAverages.map((_, i) =>
+  minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
+);
 
     // 移除旧的legend
     let oldLegend = document.getElementById("food-legend-area");
@@ -331,7 +305,7 @@ function drawCountryCostChart(transitionMode) {
     selectedFoodKey = null;
   }
 
-  const data = [...jsonData].sort((a, b) => parseFloat(b.TagGNI) - parseFloat(a.TagGNI));
+  const data = getDataSortedByIncome();  
   const chartWidth = stageWidth - margin.left - margin.right;
   const chartHeight = stageHeight - margin.top - margin.bottom;
   const gap = 6;
@@ -362,16 +336,11 @@ function drawCountryCostChart(transitionMode) {
     foodAverages.sort((a, b) => b.avg - a.avg);
 
     // 3. 分配透明度（最高均价最低透明度）
-    const baseColor = [253, 150, 179]; // 粉色RGB
+        const baseColor = [253, 150, 179]; // 粉色RGB
     const minAlpha = 0.10, maxAlpha = 1;
     const alphas = foodAverages.map((_, i) =>
-      minAlpha + (maxAlpha - minAlpha) * (foodAverages.length - 1 - i) / (foodAverages.length - 1)
-    );
-
-    // 4. 绘制每个国家的堆积bar
-    let tooltip = document.createElement("div");
-    tooltip.classList.add("tooltip");
-    document.body.appendChild(tooltip);
+  minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
+);
 
     data.forEach((country, i) => {
       let yStack = margin.top + chartHeight;
@@ -900,37 +869,7 @@ function barToScatterUltraSmoothTransition() {
 
   // scatter top area erstellen
   let scatterTop = document.createElement("div");
-  scatterTop.style.display = "flex";
-  scatterTop.style.gap = "18px";
-  scatterTop.style.zIndex = "30";
   scatterTop.id = "scatter-top-btns";
-
-  // drei Schaltflächen erstellen
-  scatterFields.forEach(f => {
-    let btn = document.createElement("button");
-    btn.textContent = f.label;
-    btn.classList.add("top-btn");
-    if (f.key === currentScatterField) btn.classList.add("active");
-    btn.addEventListener("mouseenter", () => btn.classList.add("active"));
-    btn.addEventListener("mouseleave", () => {
-      if (barToScatterUltraSmoothTransition.currentScatterField !== f.key) btn.classList.remove("active");
-    });
-
-    btn.addEventListener("click", () => {
-      barToScatterUltraSmoothTransition.prevRField = barToScatterUltraSmoothTransition.currentScatterField;
-      barToScatterUltraSmoothTransition.currentScatterField = f.key;
-      Array.from(scatterTop.children).forEach((b, idx) => {
-        if (scatterFields[idx].key === f.key) {
-          b.classList.add("active");
-        } else {
-          b.classList.remove("active");
-        }
-      });
-      barToScatterUltraSmoothTransition.hasEnteredScatter = true;
-      barToScatterUltraSmoothTransition();
-    });
-    scatterTop.appendChild(btn);
-  });
 
   // old area entfernen
   let oldScatterTop = document.getElementById("scatter-top-btns");
@@ -938,7 +877,7 @@ function barToScatterUltraSmoothTransition() {
   document.querySelector("#top-area").appendChild(scatterTop);
 
   // Daten vorbereiten
-  const data = [...jsonData].sort((a, b) => parseFloat(b.TagGNI) - parseFloat(a.TagGNI));
+  const data = getDataSortedByIncome();
   const chartWidth = stageWidth - margin.left - margin.right;
   const chartHeight = stageHeight - margin.top - margin.bottom;
   const gap = 6;
@@ -1028,12 +967,6 @@ for (let i = 0; i <= yTicks; i++) {
   label.textContent = val >= 1000 ? Math.round(val) : val.toFixed(1);
   document.querySelector("#renderer").appendChild(label);
 }
-
-  // tooltip
-  let tooltip = document.createElement("div");
-  tooltip.classList.add("tooltip");
-  document.body.appendChild(tooltip);
-
   // 只在第一次 bar->scatter 时执行动画，后续切换仅变大小
   if (!barToScatterUltraSmoothTransition.hasEnteredScatter) {
     // 先画bar，后变成dot
@@ -1231,7 +1164,7 @@ function drawOverviewChart() {
   const chartHeight = stageHeight - margin.top - margin.bottom;
 
   // Daten & Bereich
-  const data = [...jsonData].sort((a, b) => parseFloat(b.TagGNI) - parseFloat(a.TagGNI));
+  const data = getDataSortedByIncome();
   const minCost = Math.min(...data.map(d => parseFloat(d["Cost"])));
   const maxCost = Math.max(...data.map(d => parseFloat(d["Cost"])));
   const minIncome = Math.min(...data.map(d => parseFloat(d["TagGNI"])));
@@ -1325,10 +1258,6 @@ const maxdifference = Math.max(...differences);
   }
   simulate(nodes, 300);
 
-  // tooltip
-  let tooltip = document.createElement("div");
-  tooltip.classList.add("tooltip");
-  document.body.appendChild(tooltip);
 
   // Kreise
   nodes.forEach(node => {
