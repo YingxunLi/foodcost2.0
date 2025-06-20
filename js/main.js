@@ -2,17 +2,6 @@ let stageHeight;
 let stageWidth;
 const margin = { top: 176, right: 80, bottom: 88, left: 80 }; 
 
-// ----------- Checkbox ----------- 
-const fields = [
-  { key: "TotalCost", label: "Total Cost" }, 
-  { key: "Fruits", label: "Fruits" },
-  { key: "Vegetables", label: "Vegetables" },
-  { key: "Starchy Staples", label: "Starchy Staples" },
-  { key: "Animal-source Foods", label: "Animal-source Foods" },
-  { key: "Nuts", label: "Nuts" },
-  { key: "Oils and Fats", label: "Oils and Fats" }
-];
-
 // ----------- recht Button ----------- 
 const topFields = [
   { key: "Cost", label: "Cost" },
@@ -145,6 +134,8 @@ function switchPage(mode) {
     // --- 新增：scatter->bar 动画 ---
     const dots = document.querySelectorAll(".bar-to-dot");
     if (dots.length > 0) {
+      renderTopArea("bar");
+
       // 按 TagGNI 排序，和 bar 顺序一致
       const data = getDataSortedByIncome();
       const chartWidth = stageWidth - margin.left - margin.right;
@@ -166,7 +157,6 @@ function switchPage(mode) {
       });
       // 动画结束后再渲染 bar
       setTimeout(() => {
-        renderTopArea("bar");
         drawCountryCostChart();
       }, 900);
       return;
@@ -199,7 +189,6 @@ function init() {
   switchPage("bar");
 }
 
-// ----------- 文件末尾添加 -----------
 init();
 
 // ----------- sortieren nach income ----------- 
@@ -208,17 +197,10 @@ function getDataSortedByIncome() {
 }
 
 // ----------- healthy diet cost ----------- 
-
 function drawCountryCostChart(transitionMode) {
-  let topOptions = document.querySelector("#top-area > div:last-child");
-  if (topOptions) topOptions.style.display = "flex";
-
   document.querySelector("#renderer").innerHTML = "";
 
-  // ----------- 添加底部图例区域 -----------
-  // 仅在 currentField === "Cost" 时显示
   if (currentField === "Cost") {
-    // 计算颜色透明度
     const foodKeys = [
       "Fruits",
       "Vegetables",
@@ -234,77 +216,64 @@ function drawCountryCostChart(transitionMode) {
     foodAverages.sort((a, b) => b.avg - a.avg);
 
     const baseColor = [253, 150, 179];    const minAlpha = 0.10, maxAlpha = 1;
-const alphas = foodAverages.map((_, i) =>
-  minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
-);
+    const alphas = foodAverages.map((_, i) =>
+    minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
+    );
 
-    // 移除旧的legend
+    // alte weg
     let oldLegend = document.getElementById("food-legend-area");
     if (oldLegend) oldLegend.remove();
 
-    // 创建legend区域
+    // legend-area
     const chartWidth = stageWidth - margin.left - margin.right;
     let legendArea = document.createElement("div");
     legendArea.id = "food-legend-area";
-    legendArea.style.position = "absolute";
+    legendArea.style.top = `${stageHeight - margin.bottom + 10}px`;
     legendArea.style.left = `${margin.left}px`;
-    legendArea.style.top = `${stageHeight - margin.bottom + 20}px`;
-    legendArea.style.width = `${chartWidth}px`;
-    legendArea.style.display = "flex";
-    legendArea.style.flexWrap = "wrap";
-    legendArea.style.gap = "24px";
-    legendArea.style.alignItems = "center";
-    legendArea.style.fontSize = "16px"; // 原复选框字体
-    legendArea.style.color = "#6B7C8D"; // 原复选框未选中颜色
+    legendArea.style.width = `${stageWidth - margin.left - margin.right}px`;
 
-    foodAverages.forEach((food, idx) => {
-      let item = document.createElement("div");
-      item.style.display = "flex";
-      item.style.alignItems = "center";
-      item.style.cursor = "pointer";
-      // 高亮选中
-      if (selectedFoodKey === food.key) {
-        item.style.background = "rgba(253,150,179,0.15)";
-        item.style.borderRadius = "6px";
-        item.style.boxShadow = "0 0 0 2px #FD96B3";
-      }
-      // 色块
-      let colorBox = document.createElement("span");
-      colorBox.style.display = "inline-block";
-      colorBox.style.width = "22px";
-      colorBox.style.height = "22px";
-      colorBox.style.marginRight = "8px";
-      colorBox.style.borderRadius = "4px";
-      colorBox.style.background = `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`;
-      item.appendChild(colorBox);
-      // 名称
-      let label = document.createElement("span");
-      label.textContent = food.key;
-      item.appendChild(label);
-
-      // 点击事件
-      item.onclick = () => {
-        // 再次点击已选中则取消选中
-        if (selectedFoodKey === food.key) {
+    const legendItems = [
+      {
+        key: "Total Cost",
+        selected: !selectedFoodKey,
+        onClick: () => {
           selectedFoodKey = null;
-        } else {
-          selectedFoodKey = food.key;
+          drawCountryCostChart();
         }
-        drawCountryCostChart(); // 重新渲染
-      };
+      },
+    ...foodAverages.map((food, idx) => ({
+      key: food.key,
+      color: `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`,
+      selected: selectedFoodKey === food.key,
+      onClick: () => {
+        selectedFoodKey = selectedFoodKey === food.key ? null : food.key;
+        drawCountryCostChart();
+      }
+    }))
+  ];
 
-      legendArea.appendChild(item);
-    });
-
-    renderer.parentNode.appendChild(legendArea);
+  legendItems.forEach(itemData => {
+    let item = document.createElement("div");
+    item.className = "legend-item" + (itemData.selected ? " selected" : "");
+    let colorBox = document.createElement("span");
+    colorBox.className = "legend-color";
+    colorBox.style.background = itemData.color;
+    item.appendChild(colorBox);
+    let label = document.createElement("span");
+    label.textContent = itemData.key;
+    item.appendChild(label);
+    item.onclick = itemData.onClick;
+    legendArea.appendChild(item);
+  });
+  renderer.parentNode.appendChild(legendArea);
   } else {
-    // 非cost视图时移除legend
+    // income & ratio brauchen keine legend
     let oldLegend = document.getElementById("food-legend-area");
     if (oldLegend) oldLegend.remove();
-    // 退出cost视图时清空选中
     selectedFoodKey = null;
   }
-
+    
+  // bar-area
   const data = getDataSortedByIncome();  
   const chartWidth = stageWidth - margin.left - margin.right;
   const chartHeight = stageHeight - margin.top - margin.bottom;
@@ -317,7 +286,6 @@ const alphas = foodAverages.map((_, i) =>
 
   const bars = [];
 
-  // ----------- 堆叠 bar 作为 Cost 视图的唯一表现形式 -----------
   if (currentField === "Cost") {
     // 1. 计算六种食物的平均价格
     const foodKeys = [
@@ -377,7 +345,6 @@ const alphas = foodAverages.map((_, i) =>
         seg.style.height = `${barHeight}px`;
         seg.style.background = `rgba(253,150,179,${alphas[idx]})`;
         seg.style.transition = "height 0.5s, top 0.5s";
-        seg.title = `${selectedFoodKey}: $${value.toFixed(2)}`;
 
         // tooltip
         seg.addEventListener("mouseenter", (event) => {
@@ -415,7 +382,6 @@ const alphas = foodAverages.map((_, i) =>
           seg.style.height = `${barHeight}px`;
           seg.style.background = `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`;
           seg.style.transition = "height 0.5s, top 0.5s";
-          seg.title = `${food.key}: $${value.toFixed(2)}`;
 
           // 添加tooltip交互
           seg.addEventListener("mouseenter", (event) => {

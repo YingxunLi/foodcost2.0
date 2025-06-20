@@ -56,6 +56,7 @@ body {
     text-align: left;
     line-height: 1.1;
 }
+
 /* -----------  Button container -----------  */
 .right-area {
   display: flex;
@@ -101,7 +102,6 @@ body {
     color: #fff;
 }
 
-/* 合并 main/affordability/overview 样式 */
 .top-btn.main,
 .top-btn.affordability,
 .top-btn.overview {
@@ -114,18 +114,15 @@ body {
     transition: background 0.2s, color 0.2s;
 }
 
-/* 单独 main 的 margin-left */
 .top-btn.main {
     margin-left: 0px;
 }
 
-/* afford/overview 的 margin-left */
 .top-btn.affordability,
 .top-btn.overview {
     margin-left: 30px;
 }
 
-/* 合并 inactive 状态 */
 .top-btn.main.inactive,
 .top-btn.affordability.inactive,
 .top-btn.overview.inactive {
@@ -133,7 +130,6 @@ body {
     color: #E1E5E8;
 }
 
-/* 合并 active/hover 状态 */
 .top-btn.main:active,
 .top-btn.affordability:active,
 .top-btn.overview:active,
@@ -236,51 +232,53 @@ body {
 }
 
 /* ----------- Checkbox -----------  */
-#checkbox-area {
-    position: absolute;
-    z-index: 10;
-    user-select: none;
-    display: flex;
-    flex-direction: row;
-    margin: 1px 0 80px 0;
-    align-items: center;
-    padding: 8px 0;
-    border-radius: 8px;
-    justify-content: space-between;
+#food-legend-area {
+  position: absolute;
+  z-index: 10;
+  user-select: none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 8px 0;
+  border-radius: 8px;
+  justify-content: flex-start; /* 让内容自然排列 */
+  gap: 24px;
 }
-
-#checkbox-area label {
-    position: relative;
-    cursor: pointer;
-    font-size: 15px;
-    color: #333;
-    padding-left: 0;
+#food-legend-area .legend-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex: 1 1 0;
+  min-width: 120px;
+  max-width: 200px;
+  transition: box-shadow 0.2s, background 0.2s;
+  justify-content: flex-start;
+  margin: 6px 0;
+  font-size: 15px;
+  color: #333;
+  padding-left: 0;
 }
-
-#checkbox-area label input[type="radio"] {
-    display: none;
+#food-legend-area .legend-item.selected {
+  background: none;
+  box-shadow: none;
 }
-
-#checkbox-area label span {
-    position: relative;
-    padding-left: 26px;
+#food-legend-area .legend-color {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  margin-right: 12px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  transition: border 0.2s, transform 0.2s, box-shadow 0.2s;
 }
-
-#checkbox-area label span::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #E1E5E8;
-    transition: background 0.2s;
+#food-legend-area .legend-item.selected .legend-color {
+  border: 3px solid #FD96B3;
 }
-
-#checkbox-area label input[type="radio"]:checked + span::before {
-    background: #FD96B3;
+#food-legend-area .legend-item:hover .legend-color {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 2px #FD96B333;
+  border-color: #FD96B3;
 }
 
 /* ----------- overview Kreise -----------  */
@@ -313,3 +311,7 @@ body {
     background: #E1E5E8;
     pointer-events: none;
 }
+
+
+
+
