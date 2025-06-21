@@ -46,7 +46,7 @@ function renderTopArea(mode) {
  
   // main button
   const mainBtns = [
-    { key: "bar", label: "Healthy Diet Cost", class: ["top-btn", "main"] },
+    { key: "bar", label: "Cost vs Income", class: ["top-btn", "main"] },
     { key: "afford", label: "Affordability", class: ["top-btn", "main", "affordability"] },
     { key: "overview", label: "Overview", class: ["top-btn", "main", "overview"] }
   ];
@@ -200,6 +200,11 @@ function getDataSortedByIncome() {
 function drawCountryCostChart(transitionMode) {
   document.querySelector("#renderer").innerHTML = "";
 
+  // alte weg
+  let oldLegend = document.getElementById("food-legend-area");
+  if (oldLegend) oldLegend.remove();
+
+  // legendArea-checkbox
   if (currentField === "Cost") {
     const foodKeys = [
       "Fruits",
@@ -220,18 +225,12 @@ function drawCountryCostChart(transitionMode) {
     minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
     );
 
-    // alte weg
-    let oldLegend = document.getElementById("food-legend-area");
-    if (oldLegend) oldLegend.remove();
-
-    // legend-area
     const chartWidth = stageWidth - margin.left - margin.right;
     let legendArea = document.createElement("div");
     legendArea.id = "food-legend-area";
     legendArea.style.top = `${stageHeight - margin.bottom + 10}px`;
-    legendArea.style.left = `${margin.left}px`;
-    legendArea.style.width = `${stageWidth - margin.left - margin.right}px`;
-
+    legendArea.style.left = margin.left + "px";
+    legendArea.style.width = (stageWidth - margin.left - margin.right) + "px";
     const legendItems = [
       {
         key: "Total Cost",
@@ -273,7 +272,7 @@ function drawCountryCostChart(transitionMode) {
     selectedFoodKey = null;
   }
     
-  // bar-area
+  // cost-bar-area
   const data = getDataSortedByIncome();  
   const chartWidth = stageWidth - margin.left - margin.right;
   const chartHeight = stageHeight - margin.top - margin.bottom;
@@ -287,7 +286,6 @@ function drawCountryCostChart(transitionMode) {
   const bars = [];
 
   if (currentField === "Cost") {
-    // 1. 计算六种食物的平均价格
     const foodKeys = [
       "Fruits",
       "Vegetables",
@@ -300,54 +298,60 @@ function drawCountryCostChart(transitionMode) {
       key,
       avg: data.reduce((sum, d) => sum + parseFloat(d[key]), 0) / data.length
     }));
-    // 2. 按均价降序排序
     foodAverages.sort((a, b) => b.avg - a.avg);
 
-    // 3. 分配透明度（最高均价最低透明度）
-        const baseColor = [253, 150, 179]; // 粉色RGB
+    const baseColor = [253, 150, 179]; 
     const minAlpha = 0.10, maxAlpha = 1;
     const alphas = foodAverages.map((_, i) =>
-  minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
-);
+    minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
+    );
 
     data.forEach((country, i) => {
       let yStack = margin.top + chartHeight;
       const xPos = margin.left + i * (barWidth + gap);
 
-      // 如果有选中某个食物类型，只渲染灰色底bar和该食物类型的bar
       if (selectedFoodKey) {
-        // 1. 灰色底bar（总cost）
         let total = parseFloat(country["Cost"]);
         let totalBarHeight = gmynd.map(total, 0, maxCost, 0, chartHeight);
         let totalBarTop = margin.top + (chartHeight - totalBarHeight);
-        let bgBar = document.createElement("div");
-        bgBar.className = "bar cost-background";
-        bgBar.style.position = "absolute";
-        bgBar.style.left = `${xPos}px`;
-        bgBar.style.top = `${totalBarTop}px`;
-        bgBar.style.width = `${barWidth}px`;
-        bgBar.style.height = `${totalBarHeight}px`;
-        bgBar.style.background = "#eee";
-        bgBar.style.transition = "height 0.5s, top 0.5s";
-        document.querySelector("#renderer").appendChild(bgBar);
+        let bar = document.createElement("div");
+        bar.classList.add("bar", "income");
+        bar.style.position = "absolute";
+        bar.style.left = `${xPos}px`;
+        bar.style.top = `${totalBarTop}px`;
+        bar.style.width = `${barWidth}px`;
+        bar.style.height = `${totalBarHeight}px`;
+        bar.style.transition = "height 0.5s, top 0.5s";
+        document.querySelector("#renderer").appendChild(bar);
+          
+        bar.addEventListener('mouseenter', (event) => {
+          tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>Total Cost: $${total.toFixed(2)}`;
+          tooltip.style.display = "block";
+          tooltip.style.left = `${event.clientX + 10}px`;
+          tooltip.style.top = `${event.clientY + 10}px`;
+          bar.classList.add('active');
+        });
+        bar.addEventListener('mousemove', (event) => {
+          tooltip.style.left = `${event.clientX + 10}px`;
+          tooltip.style.top = `${event.clientY + 10}px`;
+          bar.classList.remove('active');
+        });
 
-        // 2. 选中食物类型的bar（粉色）
-        let idx = foodAverages.findIndex(f => f.key === selectedFoodKey);
         let value = parseFloat(country[selectedFoodKey]);
         let barHeight = gmynd.map(value, 0, maxCost, 0, chartHeight);
         let barTop = margin.top + (chartHeight - barHeight);
-        let seg = document.createElement("div");
-        seg.className = "bar food-segment";
-        seg.style.position = "absolute";
-        seg.style.left = `${xPos}px`;
-        seg.style.top = `${barTop}px`;
-        seg.style.width = `${barWidth}px`;
-        seg.style.height = `${barHeight}px`;
-        seg.style.background = `rgba(253,150,179,${alphas[idx]})`;
-        seg.style.transition = "height 0.5s, top 0.5s";
 
-        // tooltip
-        seg.addEventListener("mouseenter", (event) => {
+        let barTopDiv = document.createElement("div");
+        barTopDiv.classList.add("bar");
+        barTopDiv.style.position = "absolute";
+        barTopDiv.style.left = `${xPos}px`;
+        barTopDiv.style.top = `${barTop}px`;
+        barTopDiv.style.width = `${barWidth}px`;
+        barTopDiv.style.height = `${barHeight}px`;
+        barTopDiv.style.background = "#FED5E1";
+        barTopDiv.style.transition = "height 0.5s, top 0.5s";
+
+        barTopDiv.addEventListener("mouseenter", (event) => {
           tooltip.innerHTML = `
             <b>${country["Country Name"]}</b><br>
             ${selectedFoodKey}: $${value.toFixed(2)}
@@ -355,18 +359,19 @@ function drawCountryCostChart(transitionMode) {
           tooltip.style.display = "block";
           tooltip.style.left = `${event.clientX + 10}px`;
           tooltip.style.top = `${event.clientY + 10}px`;
+          barTopDiv.classList.add('active');
         });
-        seg.addEventListener("mousemove", (event) => {
+        barTopDiv.addEventListener("mousemove", (event) => {
           tooltip.style.left = `${event.clientX + 10}px`;
           tooltip.style.top = `${event.clientY + 10}px`;
         });
-        seg.addEventListener("mouseleave", () => {
+        barTopDiv.addEventListener("mouseleave", () => {
           tooltip.style.display = "none";
+          barTopDiv.classList.remove('active');
         });
 
-        document.querySelector("#renderer").appendChild(seg);
-      } else {
-        // 没有选中，正常堆叠渲染全部
+      document.querySelector("#renderer").appendChild(barTopDiv);
+    } else {
         foodAverages.forEach((food, idx) => {
           const value = parseFloat(country[food.key]);
           const barHeight = gmynd.map(value, 0, maxCost, 0, chartHeight);
@@ -383,7 +388,6 @@ function drawCountryCostChart(transitionMode) {
           seg.style.background = `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`;
           seg.style.transition = "height 0.5s, top 0.5s";
 
-          // 添加tooltip交互
           seg.addEventListener("mouseenter", (event) => {
             tooltip.innerHTML = `
               <b>${country["Country Name"]}</b><br>
@@ -408,7 +412,7 @@ function drawCountryCostChart(transitionMode) {
     return;
   }
 
-  // cost->income时，cost bar高度过渡
+  // cost->income
   if (transitionMode === "costToIncome") {
     // Zuerst cost-Balken rendern (mit cost-Maximalwert abbilden)
     data.forEach((country, i) => {
@@ -451,7 +455,7 @@ function drawCountryCostChart(transitionMode) {
     return;
   }
 
-  // cost->ratio时，cost bar高度过渡
+  // cost->ratio
   if (transitionMode === "costToRatio") {
     // Zuerst cost-Balken rendern (mit cost-Maximalwert abbilden)
     data.forEach((country, i) => {
@@ -494,7 +498,7 @@ function drawCountryCostChart(transitionMode) {
     return;
   }
 
-  // income->ratio时，income bar过渡到ratio灰色100bar，cost bar过渡到ratio粉色bar
+  // income->ratio
   if (transitionMode === "incomeToRatio") {
     // Zuerst income-Seite rendern: income-Balken (grau) und cost-Balken (rosa), beide mit income-Maximalwert abbilden
     data.forEach((country, i) => {
@@ -561,7 +565,7 @@ function drawCountryCostChart(transitionMode) {
     return;
   }
 
-  // ratio->income时，灰色100bar过渡到income bar，粉色bar过渡到cost bar（以income最大值映射）
+  // ratio->income
   if (transitionMode === "ratioToIncome") {
     data.forEach((country, i) => {
       const vergleich = parseFloat(country["Vergleich"]);
@@ -703,8 +707,7 @@ function drawCountryCostChart(transitionMode) {
       document.querySelector("#renderer").appendChild(barCost);
       bars.push(barIncome, barCost);
     } else if (["Cost", "Vergleich"].includes(currentField)) {
-      // Ratio-Seite: zuerst grauer背景balken (100%),
-      // 然后 rosa Balken (tatsächliches Verhältnis)
+      // Ratio-Seite: zuerst grauer
       if (currentField === "Vergleich") {
         // Grauer Hintergrundbalken (100%)
         let barBg = document.createElement("div");
@@ -718,17 +721,12 @@ function drawCountryCostChart(transitionMode) {
         document.querySelector("#renderer").appendChild(barBg);
       }
 
-      // Rosa Balken
       let bar = document.createElement("div");
       bar.classList.add("bar");
       bar.style.width = `${barWidth}px`;
       bar.style.height = `${barHeight}px`;
       bar.style.left = `${xPos}px`;
       bar.style.top = `${yPos}px`;
-      bar.style.position = "absolute";
-      // 不再设置 backgroundColor、borderRadius、zIndex
-      bar.dataset.baseColor = "#FED5E1";
-      bar.dataset.activeColor = "#FD96B3";
 
       bar.addEventListener('mouseenter', () => {
         let val = fieldValue;
@@ -739,8 +737,6 @@ function drawCountryCostChart(transitionMode) {
         const barRect = bar.getBoundingClientRect();
         tooltip.style.left = `${barRect.right + 10}px`;
         tooltip.style.top = `${barRect.top}px`;
-
-        // 只高亮当前 bar
         bars.forEach(b => b.classList.remove('active'));
         bar.classList.add('active');
       });
@@ -760,7 +756,6 @@ function drawCountryCostChart(transitionMode) {
       document.querySelector("#renderer").appendChild(bar);
       bars.push(bar);
     } else {
-      // cost-Balken（灰色/半透明，底层）
       let costBar = document.createElement("div");
       costBar.classList.add("bar", "cost-background");
       costBar.style.width = `${barWidth}px`;
@@ -771,17 +766,12 @@ function drawCountryCostChart(transitionMode) {
       costBar.style.position = "absolute";
       document.querySelector("#renderer").appendChild(costBar);
 
-      // 普通粉色bar（顶层）
       let bar = document.createElement("div");
       bar.classList.add("bar");
       bar.style.width = `${barWidth}px`;
       bar.style.height = `${barHeight}px`;
       bar.style.left = `${xPos}px`;
       bar.style.top = `${yPos}px`;
-      bar.style.position = "absolute";
-      // 不再设置背景颜色、圆角、层级
-      bar.dataset.baseColor = "#FED5E1";
-      bar.dataset.activeColor = "#FD96B3";
 
       bar.addEventListener('mouseenter', () => {
         tooltip.innerText = `${country["Country Name"]}: ${cost}`;
