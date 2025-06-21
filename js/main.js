@@ -500,7 +500,7 @@ function drawCountryCostChart(transitionMode) {
 
   // income->ratio
   if (transitionMode === "incomeToRatio") {
-    // Zuerst income-Seite rendern: income-Balken (grau) und cost-Balken (rosa), beide mit income-Maximalwert abbilden
+    // Zuerst income-Seite rendern: income-Balken (grau) und cost-Balken (rosa)，beide mit income-Maximalwert abbilden
     data.forEach((country, i) => {
       const income = parseFloat(country["TagGNI"]);
       const cost = parseFloat(country["Cost"]);
