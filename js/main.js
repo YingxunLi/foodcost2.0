@@ -327,13 +327,11 @@ function drawCountryCostChart(transitionMode) {
         bar.addEventListener('mouseenter', (event) => {
           tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>Total Cost: $${total.toFixed(2)}`;
           tooltip.style.display = "block";
-          tooltip.style.left = `${event.clientX + 10}px`;
-          tooltip.style.top = `${event.clientY + 10}px`;
+          positionTooltip(event, tooltip);
           bar.classList.add('active');
         });
         bar.addEventListener('mousemove', (event) => {
-          tooltip.style.left = `${event.clientX + 10}px`;
-          tooltip.style.top = `${event.clientY + 10}px`;
+          positionTooltip(event, tooltip);
           bar.classList.remove('active');
         });
 
@@ -357,13 +355,11 @@ function drawCountryCostChart(transitionMode) {
             ${selectedFoodKey}: $${value.toFixed(2)}
           `;
           tooltip.style.display = "block";
-          tooltip.style.left = `${event.clientX + 10}px`;
-          tooltip.style.top = `${event.clientY + 10}px`;
+          positionTooltip(event, tooltip);
           barTopDiv.classList.add('active');
         });
         barTopDiv.addEventListener("mousemove", (event) => {
-          tooltip.style.left = `${event.clientX + 10}px`;
-          tooltip.style.top = `${event.clientY + 10}px`;
+          positionTooltip(event, tooltip);
         });
         barTopDiv.addEventListener("mouseleave", () => {
           tooltip.style.display = "none";
@@ -394,12 +390,10 @@ function drawCountryCostChart(transitionMode) {
               ${food.key}: $${value.toFixed(2)}
             `;
             tooltip.style.display = "block";
-            tooltip.style.left = `${event.clientX + 10}px`;
-            tooltip.style.top = `${event.clientY + 10}px`;
+            positionTooltip(event, tooltip);
           });
           seg.addEventListener("mousemove", (event) => {
-            tooltip.style.left = `${event.clientX + 10}px`;
-            tooltip.style.top = `${event.clientY + 10}px`;
+            positionTooltip(event, tooltip);
           });
           seg.addEventListener("mouseleave", () => {
             tooltip.style.display = "none";
@@ -1410,12 +1404,10 @@ const maxdifference = Math.max(...differences);
     group.addEventListener("mouseenter", (event) => {
       tooltip.innerHTML = `${d["Country Name"]}<br>Income (GNI): ${d.TagGNI}<br>Cost: ${d.Cost}<br>Undernourishment: ${d.Unterernährung}<br>Ratio: ${ratio.toFixed(1)}%`;
       tooltip.style.display = "block";
-      tooltip.style.left = `${event.clientX + 15}px`;
-      tooltip.style.top = `${event.clientY + 15}px`;
+      positionTooltip(event, tooltip);
     });
     group.addEventListener("mousemove", (event) => {
-      tooltip.style.left = `${event.clientX + 15}px`;
-      tooltip.style.top = `${event.clientY + 15}px`;
+      positionTooltip(event, tooltip);
     });
     group.addEventListener("mouseleave", () => {
       tooltip.style.display = "none";
@@ -1423,4 +1415,28 @@ const maxdifference = Math.max(...differences);
 
     document.querySelector("#renderer").appendChild(group);
   });
+}
+
+// ----------- 辅助函数：tooltip 边界适配 -----------
+function positionTooltip(event, tooltip, offsetX = 10, offsetY = 10) {
+  const renderer = document.querySelector('#renderer');
+  const rendererRect = renderer.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+
+  let left = event.clientX + offsetX;
+  let top = event.clientY + offsetY;
+
+  // 如果超出右边界，往左显示
+  if (left + tooltipRect.width > rendererRect.right) {
+    left = event.clientX - tooltipRect.width - offsetX;
+    if (left < rendererRect.left) left = rendererRect.left;
+  }
+  // 如果超出下边界，往上显示
+  if (top + tooltipRect.height > rendererRect.bottom) {
+    top = event.clientY - tooltipRect.height - offsetY;
+    if (top < rendererRect.top) top = rendererRect.top;
+  }
+
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
 }
