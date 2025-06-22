@@ -1370,9 +1370,10 @@ const maxdifference = Math.max(...differences);
     group.style.width = `${node.rIncome * 1.1}px`;
     group.style.height = `${node.rIncome * 1.1}px`;
 
+    let incomeCircle, costCircle;
     if (ratio < 50) {
       // income > cost, zeichen income Kreis vor cost Kreis
-      let incomeCircle = document.createElement("div");
+      incomeCircle = document.createElement("div");
       incomeCircle.className = "overview-circle-green";
       incomeCircle.style.width = incomeCircle.style.height = `${node.rIncome}px`;
       incomeCircle.style.left = incomeCircle.style.top = "50%";
@@ -1382,7 +1383,7 @@ const maxdifference = Math.max(...differences);
       group.appendChild(incomeCircle);
     } else {
       // income < cost, zeichen cost Kreis vor income Kreis
-      let costCircle = document.createElement("div");
+      costCircle = document.createElement("div");
       costCircle.className = "overview-circle-pink";
       costCircle.style.width = costCircle.style.height = `${node.rCost}px`;
       costCircle.style.left = costCircle.style.top = "50%";
@@ -1405,12 +1406,18 @@ const maxdifference = Math.max(...differences);
       tooltip.innerHTML = `${d["Country Name"]}<br>Income (GNI): ${d.TagGNI}<br>Cost: ${d.Cost}<br>Undernourishment: ${d.Unterernährung}<br>Ratio: ${ratio.toFixed(1)}%`;
       tooltip.style.display = "block";
       positionTooltip(event, tooltip);
+      // 新增：hover时高亮circle
+      if (incomeCircle) incomeCircle.classList.add("hover");
+      if (costCircle) costCircle.classList.add("hover");
     });
     group.addEventListener("mousemove", (event) => {
       positionTooltip(event, tooltip);
     });
     group.addEventListener("mouseleave", () => {
       tooltip.style.display = "none";
+      // 新增：移除高亮
+      if (incomeCircle) incomeCircle.classList.remove("hover");
+      if (costCircle) costCircle.classList.remove("hover");
     });
 
     document.querySelector("#renderer").appendChild(group);
