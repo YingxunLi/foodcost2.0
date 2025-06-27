@@ -214,11 +214,89 @@ body {
 .bar.bar-to-dot:hover {
     opacity: 1;
     background-color: #FD96B3;
-    transform: scale(1.5);
+    /* transform: scale(1.2); */
+    z-index: 100;
 }
 
+.dot-label {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  color: #FFFFFF;
+  font-size: 12px; 
+  text-align: center;
+  pointer-events: none;
+  padding: 2px 6px;
+  z-index: 1000;
+  transform: translate(-50%, -50%) scale(calc(1 / var(--dot-scale, 1))) !important;
 
+}
 
+/* ----------- x & y -----------  */
+.axis-x-tick {
+  position: absolute;
+  width: 6px;
+  height: 12px;
+  border-radius: 3px;
+  background: #E1E5E8;
+  z-index: 5;
+}
+
+.axis-y-tick {
+  position: absolute;
+  width: 12px;
+  height: 6px;
+  border-radius: 3px;
+  background: #E1E5E8;
+  z-index: 5;
+}
+
+.axis-x-tick-label,
+.axis-y-tick-label {
+  position: absolute;
+  color: #6B7C8D;
+  font-size: 12px;
+  z-index: 5;
+}
+
+#scatter-hover-vline {
+  position: absolute;
+  z-index: 1;
+  background: repeating-linear-gradient(0deg,#E1E5E8 0 6px,transparent 6px 12px);
+}
+#scatter-hover-hline {
+  position: absolute;
+  z-index: 1;
+  background: repeating-linear-gradient(90deg, #E1E5E8 0 6px, transparent 6px 12px);
+}
+
+#scatter-hover-xlabel,
+#scatter-hover-ylabel {
+  position: absolute;
+  color: #FD96B3;
+  font-weight: bold;
+  font-size: 12px;
+  background: transparent;
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 1001;
+}
+
+.axis-x-tick,
+.axis-x-tick-label,
+.axis-y-tick,
+.axis-y-tick-label {
+  display: none;
+}
+.axis-x-tick.show,
+.axis-x-tick-label.show,
+.axis-y-tick.show,
+.axis-y-tick-label.show {
+  display: block;
+}
+
+/* ----------- tooltip -----------  */
 .tooltip {
     position: absolute;
     pointer-events: none;
@@ -282,8 +360,7 @@ body {
     border-radius: 50%;
     /* background: #FD96B3;
     opacity: 0.4; */
-        background: none;
-
+    background: none;
     pointer-events: none;
     opacity: 0.4;
     transition: opacity 0.2s;

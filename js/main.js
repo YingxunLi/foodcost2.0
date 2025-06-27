@@ -128,6 +128,15 @@ function renderTopArea(mode) {
 // ----------- switch mode ----------- 
 function switchPage(mode) {
   currentPage = mode;
+  
+  // State-Reset für alle Modi außer afford
+  if (mode !== "afford") {
+    // Reset scatter state when leaving affordability
+    barToScatterUltraSmoothTransition.hasEnteredScatter = false;
+    barToScatterUltraSmoothTransition.currentScatterField = "Vergleich";
+    barToScatterUltraSmoothTransition.prevRField = "Vergleich";
+  }
+  
   if (mode === "bar") {
     currentField = "Cost";
     currentTopField = "Cost";
@@ -155,8 +164,10 @@ function switchPage(mode) {
         dot.style.top = `${yPos}px`;
         dot.style.borderRadius = "0";
       });
-      // 动画结束后再渲染 bar
+      // 动画结束后再渲染 bar 并清理 dots
       setTimeout(() => {
+        // Vollständige Bereinigung aller scatter-bezogenen Elemente
+        document.querySelectorAll(".bar-to-dot").forEach(el => el.remove());
         drawCountryCostChart();
       }, 900);
       return;
@@ -172,6 +183,8 @@ function switchPage(mode) {
     renderTopArea("afford");
     barToScatterUltraSmoothTransition();
   } else if (mode === "overview") {
+    // Vollständige Bereinigung aller scatter-bezogenen Elemente
+    document.querySelectorAll(".bar-to-dot").forEach(el => el.remove());
     renderTopArea("overview");
     drawOverviewChart();
   }
@@ -196,7 +209,7 @@ function getDataSortedByIncome() {
   return [...jsonData].sort((a, b) => parseFloat(a.TagGNI) - parseFloat(b.TagGNI));
 }
 
-// ----------- healthy diet cost ----------- 
+// ----------- 📒 cost vs income ----------- 
 function drawCountryCostChart(transitionMode) {
   document.querySelector("#renderer").innerHTML = "";
 
@@ -680,7 +693,7 @@ function drawCountryCostChart(transitionMode) {
 
       // Interaktion: cost
       barCost.addEventListener('mouseenter', () => {
-        tooltip.innerText = `${country["Country Name"]}: Cost $${cost}`;
+        tooltip.innerText = `${country["Country Name"]}: Cost $${cost.toFixed(2)}`;
         tooltip.style.display = "block";
         const barRect = barCost.getBoundingClientRect();
         tooltip.style.left = `${barRect.right + 10}px`;
@@ -724,8 +737,9 @@ function drawCountryCostChart(transitionMode) {
 
       bar.addEventListener('mouseenter', () => {
         let val = fieldValue;
-        if (currentField === "Cost") val = `$${fieldValue}`;
-        if (currentField === "Vergleich") val = `${fieldValue.toFixed(1)}%`;
+        if (currentField === "Cost") val = `$${fieldValue.toFixed(2)}`;
+        if (currentField === "Vergleich") val = `${fieldValue.toFixed(2)}%`;
+        if (currentField === "TagGNI") val = `$${fieldValue.toFixed(2)}`;
         tooltip.innerText = `${country["Country Name"]}: ${val}`;
         tooltip.style.display = "block";
         const barRect = bar.getBoundingClientRect();
@@ -768,7 +782,7 @@ function drawCountryCostChart(transitionMode) {
       bar.style.top = `${yPos}px`;
 
       bar.addEventListener('mouseenter', () => {
-        tooltip.innerText = `${country["Country Name"]}: ${cost}`;
+        tooltip.innerText = `${country["Country Name"]}: ${cost.toFixed(2)}`;
         tooltip.style.display = "block";
         const barRect = bar.getBoundingClientRect();
         tooltip.style.left = `${barRect.right + 10}px`;
@@ -792,7 +806,7 @@ function drawCountryCostChart(transitionMode) {
   });
 }
 
-// ----------- Affordability ----------- 
+// ----------- 📒 Affordability ----------- 
 function barToScatterUltraSmoothTransition() {
   document.querySelector("#renderer").innerHTML = "";
 
@@ -829,6 +843,7 @@ function barToScatterUltraSmoothTransition() {
 
   // Daten vorbereiten
   const data = getDataSortedByIncome();
+  // console.log("data", data); 
   const chartWidth = stageWidth - margin.left - margin.right;
   const chartHeight = stageHeight - margin.top - margin.bottom;
   const gap = 6;
@@ -845,80 +860,60 @@ function barToScatterUltraSmoothTransition() {
   const minR = Math.min(...data.map(d => parseFloat(d[rField])));
   const maxR = Math.max(...data.map(d => parseFloat(d[rField])));
 
-  // X轴刻度点和数字
-const xTicks = 5;
-for (let i = 0; i <= xTicks; i++) {
-  const t = i / xTicks;
-  // 对数轴
-  const logMinX = Math.log10(minX);
-  const logMaxX = Math.log10(maxX);
-  const logVal = logMinX + t * (logMaxX - logMinX);
-  const val = Math.pow(10, logVal);
-  const x = gmynd.map(logVal, logMinX, logMaxX, 0, chartWidth);
+  // X 
+  const xTicks = 5;
+  for (let i = 0; i <= xTicks; i++) {
+    const t = i / xTicks;
+    // log
+    const logMinX = Math.log10(minX);
+    const logMaxX = Math.log10(maxX);
+    const logVal = logMinX + t * (logMaxX - logMinX);
+    const val = Math.pow(10, logVal);
+    const x = gmynd.map(logVal, logMinX, logMaxX, 0, chartWidth);
 
-  // 刻度点
-  let tick = document.createElement("div");
-  tick.style.position = "absolute";
-  tick.style.left = `${margin.left + x - 3}px`;
-  tick.style.top = `${margin.top + chartHeight - 3 + 2}px`;
-  tick.style.width = "6px";
-  tick.style.height = "6px";
-  tick.style.borderRadius = "50%";
-  tick.style.background = "#bbb";
-  tick.style.display = "none";
-  tick.className = "axis-x-tick";
-  document.querySelector("#renderer").appendChild(tick);
+    // x punkt
+    let tick = document.createElement("div");
+    tick.className = "axis-x-tick";
+    tick.style.left = `${margin.left + x - 3}px`;
+    tick.style.top = `${margin.top + chartHeight - 3 + 2}px`;
+    document.querySelector("#renderer").appendChild(tick);
 
-  // 刻度数字
-  let label = document.createElement("div");
-  label.style.position = "absolute";
-  label.style.left = `${margin.left + x - 15}px`;
-  label.style.top = `${margin.top + chartHeight + 10}px`;
-  label.style.color = "#6B7C8D";
-  label.style.fontSize = "12px";
-  label.style.display = "none";
-  label.className = "axis-x-tick-label";
-  label.textContent = val >= 1000 ? Math.round(val) : val.toFixed(1);
-  document.querySelector("#renderer").appendChild(label);
-}
+    // x label
+    let label = document.createElement("div");
+    label.className = "axis-x-tick-label";
+    label.style.left = `${margin.left + x - 15}px`;
+    label.style.top = `${margin.top + chartHeight + 10}px`;
+    label.textContent = val >= 1000 ? val.toFixed(0) : val.toFixed(2);
+    document.querySelector("#renderer").appendChild(label);
+  }
 
-// Y轴刻度点和数字
-const yTicks = 5;
-for (let i = 0; i <= yTicks; i++) {
-  const t = i / yTicks;
-  // 对数轴
-  const logMinY = Math.log10(minY);
-  const logMaxY = Math.log10(maxY);
-  const logVal = logMinY + t * (logMaxY - logMinY);
-  const val = Math.pow(10, logVal);
-  const y = gmynd.map(logVal, logMinY, logMaxY, chartHeight, 0);
+  // Y 
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const t = i / yTicks;
+    // log
+    const logMinY = Math.log10(minY);
+    const logMaxY = Math.log10(maxY);
+    const logVal = logMinY + t * (logMaxY - logMinY);
+    const val = Math.pow(10, logVal);
+    const y = gmynd.map(logVal, logMinY, logMaxY, chartHeight, 0);
 
-  // 刻度点
-  let tick = document.createElement("div");
-  tick.style.position = "absolute";
-  tick.style.left = `${margin.left - 6}px`;
-  tick.style.top = `${margin.top + y - 3}px`;
-  tick.style.width = "6px";
-  tick.style.height = "6px";
-  tick.style.borderRadius = "50%";
-  tick.style.background = "#bbb";
-  tick.style.display = "none";
-  tick.className = "axis-y-tick";
-  document.querySelector("#renderer").appendChild(tick);
+    // y punkt
+    let tick = document.createElement("div");
+    tick.style.left = `${margin.left - 6}px`;
+    tick.style.top = `${margin.top + y - 3}px`;
+    tick.className = "axis-y-tick";
+    document.querySelector("#renderer").appendChild(tick);
 
-  // 刻度数字
-  let label = document.createElement("div");
-  label.style.position = "absolute";
-  label.style.left = `${margin.left - 45}px`;
-  label.style.top = `${margin.top + y - 8}px`;
-  label.style.color = "#6B7C8D";
-  label.style.fontSize = "12px";
-  label.style.display = "none";
-  label.className = "axis-y-tick-label";
-  label.textContent = val >= 1000 ? Math.round(val) : val.toFixed(1);
-  document.querySelector("#renderer").appendChild(label);
-}
-  // 只在第一次 bar->scatter 时执行动画，后续切换仅变大小
+    // y label
+    let label = document.createElement("div");
+    label.style.left = `${margin.left - 45}px`;
+    label.style.top = `${margin.top + y - 8}px`;
+    label.className = "axis-y-tick-label";
+    label.textContent = val >= 1000 ? val.toFixed(0) : val.toFixed(2);
+    document.querySelector("#renderer").appendChild(label);
+  } 
+
   if (!barToScatterUltraSmoothTransition.hasEnteredScatter) {
     // 先画bar，后变成dot
     let barDots = [];
@@ -946,11 +941,16 @@ for (let i = 0; i <= yTicks; i++) {
       bar.style.height = `${barHeight}px`;
       bar.style.left = `${xPos}px`;
       bar.style.top = `${yPos}px`;
-      bar.style.position = "absolute";
       bar.style.cursor = "pointer";
       bar.style.transition = "width 0.9s cubic-bezier(0.4, 0, 0.2, 1), height 0.9s cubic-bezier(0.4, 0, 0.2, 1), left 0.9s cubic-bezier(0.4, 0, 0.2, 1), top 0.9s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.9s cubic-bezier(0.4, 0, 0.2, 1)";
       document.querySelector("#renderer").appendChild(bar);
       barDots.push(bar);
+
+      let label = document.createElement("div");
+      label.className = "dot-label";
+      label.style.display = "none";
+      bar.appendChild(label);
+      bar._dotLabel = label;
 
       // 记录起始和目标状态
       bar.style.transition = "none";
@@ -975,20 +975,34 @@ for (let i = 0; i <= yTicks; i++) {
     // 绑定交互
     data.forEach((country, i) => {
       let bar = barDots[i];
+      let label = bar._dotLabel;
       bar.onmouseenter = () => {
-        // ...existing code...
+          let field = barToScatterUltraSmoothTransition.currentScatterField;
+          let value = country[field];
+          value = parseFloat(value);
+          value = value.toFixed(2);
+          let fieldLabel = {
+            "Vergleich": "Ratio",
+            "Percent cannot afford": "Unaffordability",
+            "Unterernährung": "Malnutrition"
+          }[field] || field;
+          label.innerHTML = `<b>${country["Country Name"]}</b><br>${fieldLabel}: ${value}`;
+          label.style.display = "block";
 
-        // ====== 新增：辅助线和标注 ======
-        drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY);
+          drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY);
+          document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label').forEach(el => {
+            el.classList.add('show');
+          });
       };
       bar.onmousemove = () => {
         tooltip.style.left = `${bar.getBoundingClientRect().right + 10}px`;
         tooltip.style.top = `${bar.getBoundingClientRect().top}px`;
       };
       bar.onmouseleave = () => {
-        // ...existing code...
-
-        // ====== 新增：移除辅助线和标注 ======
+        label.style.display = "none";
+        document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label').forEach(el => {
+          el.classList.remove('show');
+        });
         removeScatterHoverLines();
       };
     });
@@ -1035,38 +1049,64 @@ for (let i = 0; i <= yTicks; i++) {
 
     let dot = document.createElement("div");
     dot.classList.add("bar", "bar-to-dot");
-    dot.style.position = "absolute";
     dot.style.left = `${margin.left + x - prevR / 2}px`;
     dot.style.top = `${margin.top + y - prevR / 2}px`;
     dot.style.width = `${prevR}px`;
     dot.style.height = `${prevR}px`;
     dot.style.cursor = "pointer";
-    dot.style.borderRadius = `50%`;
     dot.style.transition = "width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s cubic-bezier(0.4, 0, 0.2, 1), left 0.6s cubic-bezier(0.4, 0, 0.2, 1), top 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
     document.querySelector("#renderer").appendChild(dot);
-    dots.push({ dot, x, y, prevR, r });
+    // dots.push({ dot, x, y, prevR, r });
+
+    // 新增：label容器，初始隐藏
+    let label = document.createElement("div");
+    label.className = "dot-label";
+    label.style.display = "none";
+    dot.appendChild(label);
+
+    // document.querySelector("#renderer").appendChild(dot);
+    dots.push({ dot, x, y, prevR, r, label });
   });
 
   // 绑定交互
   data.forEach((country, i) => {
-    let bar = dots[i].dot;
-    bar.onmouseenter = () => {
-      // ...existing code...
+  let bar = dots[i].dot;
+  let label = dots[i].label;
+  bar.onmouseenter = () => {
+    // 计算scale倍数
+    const baseSize = 40;
+    const curSize = bar.offsetWidth;
+    let scale = 2.5;
+    if (curSize < baseSize) {
+      scale = Math.max(2.5, baseSize / curSize * 2.5);
+    }
+    bar.style.setProperty('--dot-scale', scale)
 
-      // ====== 新增：辅助线和标注 ======
-      drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY);
-    };
-    bar.onmousemove = () => {
-      tooltip.style.left = `${bar.getBoundingClientRect().right + 10}px`;
-      tooltip.style.top = `${bar.getBoundingClientRect().top}px`;
-    };
-    bar.onmouseleave = () => {
-      bar.style.opacity = "0.8";
-      tooltip.style.display = "none";
-      // ====== 新增：移除辅助线和标注 ======
-      removeScatterHoverLines();
-    };
-  });
+    // 动态内容
+    let field = barToScatterUltraSmoothTransition.currentScatterField;
+    let value = country[field];
+    let fieldLabel = {
+      "Vergleich": "Ratio",
+      "Percent cannot afford": "Unaffordability",
+      "Unterernährung": "Malnutrition"
+    }[field] || field;
+    label.innerHTML = `<b>${country["Country Name"]}</b><br>${fieldLabel}: ${value}`;
+    label.style.display = "block";
+
+    drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY);
+    document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label').forEach(el => {
+      el.classList.add('show');
+    });
+  };
+  bar.onmouseleave = () => {
+    bar.style.transform = "";
+    label.style.display = "none";
+    document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label').forEach(el => {
+      el.classList.remove('show');
+    });
+    removeScatterHoverLines();
+  };
+});
 
   // 强制reflow
   void document.querySelector("#renderer").offsetHeight;
@@ -1098,133 +1138,41 @@ function drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, m
   // 先移除之前的轴点、数字和连线
   removeScatterHoverAxes();
 
-  // X轴刻度点和数字
-  const xTicks = 5;
-  for (let i = 0; i <= xTicks; i++) {
-    const t = i / xTicks;
-    const logVal = logMinX + t * (logMaxX - logMinX);
-    const val = Math.pow(10, logVal);
-    const xx = gmynd.map(logVal, logMinX, logMaxX, 0, chartWidth);
-
-    // 刻度点
-    let tick = document.createElement("div");
-    tick.className = "axis-x-tick scatter-hover-tick";
-    tick.style.position = "absolute";
-    tick.style.left = `${margin.left + xx - 3}px`;
-    tick.style.top = `${margin.top + chartHeight - 3 + 2}px`;
-    tick.style.width = "6px";
-    tick.style.height = "6px";
-    tick.style.borderRadius = "50%";
-    tick.style.background = "#bbb";
-    document.querySelector("#renderer").appendChild(tick);
-
-    // 刻度数字
-    let label = document.createElement("div");
-    label.className = "axis-x-tick-label scatter-hover-tick";
-    label.style.position = "absolute";
-    label.style.left = `${margin.left + xx - 15}px`;
-    label.style.top = `${margin.top + chartHeight + 10}px`;
-    label.style.color = "#6B7C8D";
-    label.style.fontSize = "12px";
-    label.textContent = val >= 1000 ? Math.round(val) : val.toFixed(1);
-    document.querySelector("#renderer").appendChild(label);
-  }
-
-  // Y轴刻度点和数字
-  const yTicks = 5;
-  for (let i = 0; i <= yTicks; i++) {
-    const t = i / yTicks;
-    const logVal = logMinY + t * (logMaxY - logMinY);
-    const val = Math.pow(10, logVal);
-    const yy = gmynd.map(logVal, logMinY, logMaxY, chartHeight, 0);
-
-    // 刻度点
-    let tick = document.createElement("div");
-    tick.className = "axis-y-tick scatter-hover-tick";
-    tick.style.position = "absolute";
-    tick.style.left = `${margin.left - 6}px`;
-    tick.style.top = `${margin.top + yy - 3}px`;
-    tick.style.width = "6px";
-    tick.style.height = "6px";
-    tick.style.borderRadius = "50%";
-    tick.style.background = "#bbb";
-    document.querySelector("#renderer").appendChild(tick);
-
-    // 刻度数字
-    let label = document.createElement("div");
-    label.className = "axis-y-tick-label scatter-hover-tick";
-    label.style.position = "absolute";
-    label.style.left = `${margin.left - 45}px`;
-    label.style.top = `${margin.top + yy - 8}px`;
-    label.style.color = "#6B7C8D";
-    label.style.fontSize = "12px";
-    label.textContent = val >= 1000 ? Math.round(val) : val.toFixed(1);
-    document.querySelector("#renderer").appendChild(label);
-  }
-
   // 连线
-  // 垂直线（粉色，income->x轴）
   let vLine = document.createElement("div");
   vLine.id = "scatter-hover-vline";
-  vLine.style.position = "absolute";
   vLine.style.left = `${margin.left + x}px`;
   vLine.style.top = `${margin.top + y}px`;
   vLine.style.width = "2px";
   vLine.style.height = `${chartHeight - y}px`;
-  vLine.style.background = "repeating-linear-gradient(90deg,#E1E5E8 0 6px,transparent 6px 12px)";
-  vLine.style.zIndex = 1000;
   document.querySelector("#renderer").appendChild(vLine);
 
-  // 水平线（灰色虚线，cost->y轴）
   let hLine = document.createElement("div");
   hLine.id = "scatter-hover-hline";
-  hLine.style.position = "absolute";
   hLine.style.left = `${margin.left}px`;
   hLine.style.top = `${margin.top + y}px`;
   hLine.style.width = `${x}px`;
   hLine.style.height = "2px";
-  hLine.style.background = "repeating-linear-gradient(90deg,#E1E5E8 0 6px,transparent 6px 12px)";
-  hLine.style.opacity = "0.7";
-  hLine.style.zIndex = 1000;
   document.querySelector("#renderer").appendChild(hLine);
 
   // x轴数值标注
   let xLabel = document.createElement("div");
   xLabel.id = "scatter-hover-xlabel";
-  xLabel.style.position = "absolute";
   xLabel.style.left = `${margin.left + x - 30}px`;
   xLabel.style.top = `${margin.top + chartHeight + 22}px`;
-  xLabel.style.color = "#FD96B3";
-  xLabel.style.fontWeight = "bold";
-  xLabel.style.fontSize = "13px";
-  xLabel.style.background = "#fff";
-  xLabel.style.padding = "2px 6px";
-  xLabel.style.borderRadius = "4px";
-  xLabel.style.boxShadow = "0 1px 4px rgba(0,0,0,0.04)";
-  xLabel.style.zIndex = 1001;
-  xLabel.textContent = `Income: $${country["TagGNI"]}`;
+  xLabel.textContent = `Income: $${parseFloat(country["TagGNI"]).toFixed(2)}`;
   document.querySelector("#renderer").appendChild(xLabel);
 
   // y轴数值标注
   let yLabel = document.createElement("div");
   yLabel.id = "scatter-hover-ylabel";
-  yLabel.style.position = "absolute";
   yLabel.style.left = `${margin.left - 60}px`;
   yLabel.style.top = `${margin.top + y - 12}px`;
-  yLabel.style.color = "#FD96B3";
-  yLabel.style.fontWeight = "bold";
-  yLabel.style.fontSize = "13px";
-  yLabel.style.background = "#fff";
-  yLabel.style.padding = "2px 6px";
-  yLabel.style.borderRadius = "4px";
-  yLabel.style.boxShadow = "0 1px 4px rgba(0,0,0,0.04)";
-  yLabel.style.zIndex = 1001;
-  yLabel.textContent = `Cost: $${country["Cost"]}`;
+  yLabel.textContent = `Cost: $${parseFloat(country["Cost"]).toFixed(2)}`;
   document.querySelector("#renderer").appendChild(yLabel);
 }
 
 function removeScatterHoverAxes() {
-  document.querySelectorAll(".scatter-hover-tick").forEach(e => e.remove());
   let vLine = document.getElementById("scatter-hover-vline");
   if (vLine) vLine.remove();
   let hLine = document.getElementById("scatter-hover-hline");
@@ -1239,7 +1187,7 @@ function removeScatterHoverLines() {
   });
 }
 
-// ----------- Overview Chart ----------- 
+// ----------- 📒 Overview Chart ----------- 
 function drawOverviewChart() {
   document.querySelector("#renderer").innerHTML = "";
     
@@ -1294,7 +1242,7 @@ function drawOverviewChart() {
     const logMinIncome = Math.log10(minIncome);
     const logMaxIncome = Math.log10(maxIncome);
     const xBase = gmynd.map(Math.log10(income), logMinIncome, logMaxIncome, margin.left, margin.left + chartWidth);
-    const x = xBase + (Math.random() - 0.5) * 40; 
+    const x = xBase + (Math.random() - 0.5) * 0; 
     const y = margin.top + Math.random() * chartHeight;
 
     return {
@@ -1332,10 +1280,14 @@ const maxdifference = Math.max(...differences);
             let move = (minDist - dist) / 2;
             let mx = (dx / dist) * move;
             let my = (dy / dist) * move;
-            n1.x -= mx;
-            n1.y -= my;
-            n2.x += mx;
-            n2.y += my;
+            // n1.x -= mx;
+            // n1.y -= my;
+            // n2.x += mx;
+            // n2.y += my;
+             // n1.x -= mx;                      // <--- hier auskommentiert
+            n1.y -= my * 0.1;                   // <--- hier habe ich den Faktor 0.1 hinzugefügt
+            // n2.x += mx;                      // <--- hier auskommentiert
+            n2.y += my * 0.1; 
           }
         }
         // nicht aus dem Chartbereich heraus
@@ -1403,7 +1355,7 @@ const maxdifference = Math.max(...differences);
 
     // tooltip Interaktion
     group.addEventListener("mouseenter", (event) => {
-      tooltip.innerHTML = `${d["Country Name"]}<br>Income (GNI): ${d.TagGNI}<br>Cost: ${d.Cost}<br>Undernourishment: ${d.Unterernährung}<br>Ratio: ${ratio.toFixed(1)}%`;
+      tooltip.innerHTML = `${d["Country Name"]}<br>Income (GNI): $${parseFloat(d.TagGNI).toFixed(2)}<br>Cost: $${parseFloat(d.Cost).toFixed(2)}<br>Undernourishment: ${parseFloat(d.Unterernährung).toFixed(2)}%<br>Ratio: ${ratio.toFixed(2)}%`;
       tooltip.style.display = "block";
       positionTooltip(event, tooltip);
       // 新增：hover时高亮circle
@@ -1424,7 +1376,7 @@ const maxdifference = Math.max(...differences);
   });
 }
 
-// ----------- 辅助函数：tooltip 边界适配 -----------
+// ----------- tooltip & boundary adjustment -----------
 function positionTooltip(event, tooltip, offsetX = 10, offsetY = 10) {
   const renderer = document.querySelector('#renderer');
   const rendererRect = renderer.getBoundingClientRect();
