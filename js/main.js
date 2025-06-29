@@ -233,10 +233,21 @@ function drawCountryCostChart(transitionMode) {
     }));
     foodAverages.sort((a, b) => b.avg - a.avg);
 
-    const baseColor = [253, 150, 179];    const minAlpha = 0.10, maxAlpha = 1;
-    const alphas = foodAverages.map((_, i) =>
-    minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
-    );
+    // const baseColor = [253, 150, 179];    
+    // const minAlpha = 0.10, maxAlpha = 1;
+    // const alphas = foodAverages.map((_, i) =>
+    // minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
+    // );
+
+    // const alphas = [0.1, 0.186, 0.313, 0.486, 0.712, 1.0];
+    const colors = [
+      "hsl(343, 96%, 98%)",
+      "hsl(343, 96%, 94.51%)",
+      "hsl(343, 96%, 90.88%)",
+      "hsl(343, 96%, 87.11%)",
+      "hsl(343, 96%, 83.17%)",
+      "hsl(343, 96%, 79%)"
+    ];
 
     const chartWidth = stageWidth - margin.left - margin.right;
     let legendArea = document.createElement("div");
@@ -255,7 +266,8 @@ function drawCountryCostChart(transitionMode) {
       },
     ...foodAverages.map((food, idx) => ({
       key: food.key,
-      color: `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`,
+      // color: `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`,
+      color: colors[idx],
       selected: selectedFoodKey === food.key,
       onClick: () => {
         selectedFoodKey = selectedFoodKey === food.key ? null : food.key;
@@ -313,11 +325,21 @@ function drawCountryCostChart(transitionMode) {
     }));
     foodAverages.sort((a, b) => b.avg - a.avg);
 
-    const baseColor = [253, 150, 179]; 
-    const minAlpha = 0.10, maxAlpha = 1;
-    const alphas = foodAverages.map((_, i) =>
-    minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
-    );
+    // const baseColor = [253, 150, 179]; 
+    // const minAlpha = 0.10, maxAlpha = 1;
+    // const alphas = foodAverages.map((_, i) =>
+    // minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
+    // );
+
+    // const alphas = [0.1, 0.186, 0.313, 0.486, 0.712, 1.0];
+    const colors = [
+      "hsl(343, 96%, 98%)",
+      "hsl(343, 96%, 94.51%)",
+      "hsl(343, 96%, 90.88%)",
+      "hsl(343, 96%, 87.11%)",
+      "hsl(343, 96%, 83.17%)",
+      "hsl(343, 96%, 79%)"
+    ];
 
     data.forEach((country, i) => {
       let yStack = margin.top + chartHeight;
@@ -394,7 +416,8 @@ function drawCountryCostChart(transitionMode) {
           seg.style.top = `${yStack}px`;
           seg.style.width = `${barWidth}px`;
           seg.style.height = `${barHeight}px`;
-          seg.style.background = `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`;
+          // seg.style.background = `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`;
+          seg.style.background = colors[idx]; 
           seg.style.transition = "height 0.5s, top 0.5s";
 
           seg.addEventListener("mouseenter", (event) => {
@@ -883,7 +906,7 @@ function barToScatterUltraSmoothTransition() {
     label.className = "axis-x-tick-label";
     label.style.left = `${margin.left + x - 15}px`;
     label.style.top = `${margin.top + chartHeight + 10}px`;
-    label.textContent = val >= 1000 ? val.toFixed(0) : val.toFixed(2);
+    label.textContent = val.toFixed(2);
     document.querySelector("#renderer").appendChild(label);
   }
 
@@ -910,7 +933,7 @@ function barToScatterUltraSmoothTransition() {
     label.style.left = `${margin.left - 45}px`;
     label.style.top = `${margin.top + y - 8}px`;
     label.className = "axis-y-tick-label";
-    label.textContent = val >= 1000 ? val.toFixed(0) : val.toFixed(2);
+    label.textContent = val.toFixed(2);
     document.querySelector("#renderer").appendChild(label);
   } 
 
