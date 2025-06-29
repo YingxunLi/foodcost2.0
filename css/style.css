@@ -220,17 +220,21 @@ body {
 
 .dot-label {
   position: absolute;
-  width: 100%;
-  top: 50%;
-  left: 50%;
-  color: #FFFFFF;
-  font-size: 12px; 
-  text-align: center;
+  color: #6B7C8D;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif; 
   pointer-events: none;
-  padding: 2px 6px;
+  padding: 8px 12px;
   z-index: 1000;
-  transform: translate(-50%, -50%) scale(calc(1 / var(--dot-scale, 1))) !important;
+  border-radius: 6px;
+  white-space: nowrap;
+  display: none; 
+  font-weight: normal;
+  line-height: 1.4;
+}
 
+.dot-label b {
+  font-weight: bold;
 }
 
 /* ----------- x & y -----------  */
@@ -240,7 +244,7 @@ body {
   height: 12px;
   border-radius: 3px;
   background: #E1E5E8;
-  z-index: 5;
+  z-index: 1;
 }
 
 .axis-y-tick {
@@ -249,7 +253,7 @@ body {
   height: 6px;
   border-radius: 3px;
   background: #E1E5E8;
-  z-index: 5;
+  z-index: 1;
 }
 
 .axis-x-tick-label,
@@ -257,30 +261,34 @@ body {
   position: absolute;
   color: #6B7C8D;
   font-size: 12px;
-  z-index: 5;
+  font-family: 'Poppins', sans-serif; 
+  z-index: 1;
 }
 
 #scatter-hover-vline {
   position: absolute;
   z-index: 1;
-  background: repeating-linear-gradient(0deg,#E1E5E8 0 6px,transparent 6px 12px);
+  width: 2px;
+  background: repeating-linear-gradient(0deg, #E1E5E8 0 5px, transparent 5px 15px);
 }
 #scatter-hover-hline {
   position: absolute;
   z-index: 1;
-  background: repeating-linear-gradient(90deg, #E1E5E8 0 6px, transparent 6px 12px);
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #E1E5E8 0 5px, transparent 5px 15px);
 }
 
 #scatter-hover-xlabel,
 #scatter-hover-ylabel {
   position: absolute;
-  color: #FD96B3;
+  color: #6B7C8D;
   font-weight: bold;
-  font-size: 12px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif; 
   background: transparent;
   padding: 2px 6px;
   border-radius: 4px;
-  z-index: 1001;
+  z-index: 1;
 }
 
 .axis-x-tick,
@@ -296,6 +304,25 @@ body {
   display: block;
 }
 
+.axis-x-minor-tick,
+.axis-y-minor-tick {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 4px;
+  background: #E1E5E8;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.axis-x-minor-tick.show,
+.axis-y-minor-tick.show {
+    opacity: 1;
+   background: #E1E5E8; /* 使用更深的颜色便于观察 */
+
+}
+
 /* ----------- tooltip -----------  */
 .tooltip {
     position: absolute;
@@ -305,6 +332,7 @@ body {
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 14px;
+    font-family: 'Poppins', sans-serif;
     display: none;
     z-index: 1000;
     white-space: nowrap;
@@ -374,14 +402,14 @@ body {
 .overview-circle-unter {
     position: absolute;
     border-radius: 50%;
-    background: #E1E5E8;
+    background: #6B7280;
+    opacity: 0.2;
     pointer-events: none;
 }
 .overview-circle-green.hover,
 .overview-circle-pink.hover {
     opacity: 1 !important;
 }
-
-
-
-
+.overview-circle-unter.hover {
+    opacity: 0.5 !important;
+}
