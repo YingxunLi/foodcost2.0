@@ -857,7 +857,8 @@ function barToScatterUltraSmoothTransition() {
   // Daten vorbereiten
   const data = getDataSortedByIncome();
   // console.log("data", data); 
-  const chartWidth = stageWidth - margin.left - margin.right;
+  const yAxisSpace = 60;
+  const chartWidth = stageWidth - margin.left - margin.right - yAxisSpace;
   const chartHeight = stageHeight - margin.top - margin.bottom;
   const gap = 6;
   const barWidth = (chartWidth - gap * (data.length - 1)) / data.length;
@@ -887,15 +888,15 @@ function barToScatterUltraSmoothTransition() {
     // x punkt
     let tick = document.createElement("div");
     tick.className = "axis-x-tick";
-    tick.style.left = `${margin.left + x - 3}px`;
+    tick.style.left = `${margin.left + yAxisSpace + x - 3}px`;
     tick.style.top = `${margin.top + chartHeight - 3 + 2}px`;
     document.querySelector("#renderer").appendChild(tick);
 
     // x label
     let label = document.createElement("div");
     label.className = "axis-x-tick-label";
-    label.style.left = `${margin.left + x - 15}px`;
-    label.style.top = `${margin.top + chartHeight + 10}px`;
+    label.style.left = `${margin.left + yAxisSpace + x - 15}px`;
+    label.style.top = `${margin.top + chartHeight + 15}px`;
     label.textContent = val.toFixed(2);
     document.querySelector("#renderer").appendChild(label);
   }
@@ -906,7 +907,7 @@ function barToScatterUltraSmoothTransition() {
 
   // kleine Striche zwischen den Hauptstrichen
   for (let j = 1; j <= 5; j++) {
-    const minorT = startT + (endT - startT) * (j / 6); // 6份中的第j份
+    const minorT = startT + (endT - startT) * (j / 6); 
     const logMinX = Math.log10(minX);
     const logMaxX = Math.log10(maxX);
     const logVal = logMinX + minorT * (logMaxX - logMinX);
@@ -914,7 +915,7 @@ function barToScatterUltraSmoothTransition() {
 
     let minorTick = document.createElement("div");
     minorTick.className = "axis-x-tick axis-x-minor-tick";
-    minorTick.style.left = `${margin.left + x - 2}px`;
+    minorTick.style.left = `${margin.left + yAxisSpace + x - 2}px`;
     minorTick.style.top = `${margin.top + chartHeight - 2 + 2}px`;
     document.querySelector("#renderer").appendChild(minorTick);
   }
@@ -932,14 +933,14 @@ function barToScatterUltraSmoothTransition() {
 
     // y punkt
     let tick = document.createElement("div");
-    tick.style.left = `${margin.left - 6}px`;
+    tick.style.left = `${margin.left + yAxisSpace - 6}px`;
     tick.style.top = `${margin.top + y - 3}px`;
     tick.className = "axis-y-tick";
     document.querySelector("#renderer").appendChild(tick);
 
     // y label
     let label = document.createElement("div");
-    label.style.left = `${margin.left - 45}px`;
+    label.style.left = `${margin.left + 10}px`;
     label.style.top = `${margin.top + y - 8}px`;
     label.className = "axis-y-tick-label";
     label.textContent = val.toFixed(2);
@@ -952,7 +953,7 @@ function barToScatterUltraSmoothTransition() {
   
   // kleine Striche zwischen den Hauptstrichen
   for (let j = 1; j <= 5; j++) {
-    const minorT = startT + (endT - startT) * (j / 6); // 6份中的第j份
+    const minorT = startT + (endT - startT) * (j / 6);
     const logMinY = Math.log10(minY);
     const logMaxY = Math.log10(maxY);
     const logVal = logMinY + minorT * (logMaxY - logMinY);
@@ -960,7 +961,7 @@ function barToScatterUltraSmoothTransition() {
 
     let minorTick = document.createElement("div");
     minorTick.className = "axis-y-tick axis-y-minor-tick";
-    minorTick.style.left = `${margin.left - 4}px`;
+    minorTick.style.left = `${margin.left + yAxisSpace - 4}px`;
     minorTick.style.top = `${margin.top + y - 2}px`;
     document.querySelector("#renderer").appendChild(minorTick);
   }
@@ -1019,7 +1020,7 @@ function barToScatterUltraSmoothTransition() {
       endStates.push({
         width: r,
         height: r,
-        left: margin.left + x - r / 2,
+        left: margin.left + yAxisSpace + x - r / 2,
         top: margin.top + y - r / 2,
         borderRadius: r
       });
@@ -1044,7 +1045,7 @@ function barToScatterUltraSmoothTransition() {
           label.style.right = `${margin.right}px`;
           label.style.top = `${margin.top}px`;
 
-          drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY);
+          drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY, yAxisSpace);
           document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label, .axis-x-minor-tick, .axis-y-minor-tick').forEach(el => {
             el.classList.add('show');
           });
@@ -1100,7 +1101,7 @@ function barToScatterUltraSmoothTransition() {
 
     let dot = document.createElement("div");
     dot.classList.add("bar", "bar-to-dot");
-    dot.style.left = `${margin.left + x - prevR / 2}px`;
+    dot.style.left = `${margin.left + yAxisSpace + x - prevR / 2}px`;
     dot.style.top = `${margin.top + y - prevR / 2}px`;
     dot.style.width = `${prevR}px`;
     dot.style.height = `${prevR}px`;
@@ -1130,13 +1131,13 @@ function barToScatterUltraSmoothTransition() {
       "Percent cannot afford": "Unaffordability",
       "Unterernährung": "Malnutrition"
     }[field] || field;
-    label.innerHTML = `<b>${country["Country Name"]}</b><br>${fieldLabel}: ${value}`;
+    label.innerHTML = `<b>${country["Country Name"]}</b><br>${fieldLabel}: ${value}%`;
     label.style.display = "block";
 
     label.style.right = `${margin.right}px`;
     label.style.top = `${margin.top}px`;
 
-    drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY);
+    drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY, yAxisSpace);
     document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label, .axis-x-minor-tick, .axis-y-minor-tick').forEach(el => {
       el.classList.add('show');
     });
@@ -1156,7 +1157,7 @@ function barToScatterUltraSmoothTransition() {
   dots.forEach(({ dot, x, y, r }) => {
     dot.style.width = `${r}px`;
     dot.style.height = `${r}px`;
-    dot.style.left = `${margin.left + s + x - r / 2}px`;
+    dot.style.left = `${margin.left + yAxisSpace + x - r / 2}px`;
     dot.style.top = `${margin.top + y - r / 2}px`;
   });
 
@@ -1166,7 +1167,7 @@ function barToScatterUltraSmoothTransition() {
 }
 
 // hover-guide line
-function drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY) {
+function drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY, yAxisSpace) {
   const logMinX = Math.log10(minX);
   const logMaxX = Math.log10(maxX);
   const logMinY = Math.log10(minY);
@@ -1179,28 +1180,28 @@ function drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, m
 
   let vLine = document.createElement("div");
   vLine.id = "scatter-hover-vline";
-  vLine.style.left = `${margin.left + x}px`;
+  vLine.style.left = `${margin.left + yAxisSpace + x}px`;
   vLine.style.top = `${margin.top + y}px`;
   vLine.style.height = `${chartHeight - y}px`;
   document.querySelector("#renderer").appendChild(vLine);
 
   let hLine = document.createElement("div");
   hLine.id = "scatter-hover-hline";
-  hLine.style.left = `${margin.left}px`;
+  hLine.style.left = `${margin.left + yAxisSpace}px`;
   hLine.style.top = `${margin.top + y}px`;
   hLine.style.width = `${x}px`;
   document.querySelector("#renderer").appendChild(hLine);
 
   let xLabel = document.createElement("div");
   xLabel.id = "scatter-hover-xlabel";
-  xLabel.style.left = `${margin.left + x - 30}px`;
-  xLabel.style.top = `${margin.top + chartHeight + 22}px`;
+  xLabel.style.left = `${margin.left + yAxisSpace + x - 30}px`;
+  xLabel.style.top = `${margin.top + chartHeight + 12}px`;
   xLabel.textContent = `Income: $${parseFloat(country["TagGNI"]).toFixed(2)}`;
   document.querySelector("#renderer").appendChild(xLabel);
 
   let yLabel = document.createElement("div");
   yLabel.id = "scatter-hover-ylabel";
-  yLabel.style.left = `${margin.left - 60}px`;
+  yLabel.style.left = `${margin.left}px`;
   yLabel.style.top = `${margin.top + y - 12}px`;
   yLabel.textContent = `Cost: $${parseFloat(country["Cost"]).toFixed(2)}`;
   document.querySelector("#renderer").appendChild(yLabel);

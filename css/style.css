@@ -218,7 +218,7 @@ body {
     opacity: 1;
     background-color: #FD96B3;
     /* transform: scale(1.2); */
-    z-index: 100;
+    z-index: 1000;
 }
 
 .dot-label {
@@ -262,7 +262,7 @@ body {
 .axis-x-tick-label,
 .axis-y-tick-label {
   position: absolute;
-  color: #6B7C8D;
+  color: #E1E5E8;
   font-size: 12px;
   font-family: 'Poppins', sans-serif; 
   z-index: 1;
@@ -291,7 +291,7 @@ body {
   background: transparent;
   padding: 2px 6px;
   border-radius: 4px;
-  z-index: 1;
+  z-index: 1000;
 }
 
 .axis-x-tick,
@@ -412,7 +412,9 @@ body {
 .overview-circle-green.hover,
 .overview-circle-pink.hover {
     opacity: 1 !important;
+    z-index: 1000;
 }
 .overview-circle-unter.hover {
     opacity: 0.5 !important;
+    z-index: 1000;
 }
