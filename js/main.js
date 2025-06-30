@@ -241,12 +241,12 @@ function drawCountryCostChart(transitionMode) {
 
     // const alphas = [0.1, 0.186, 0.313, 0.486, 0.712, 1.0];
     const colors = [
-      "hsl(343, 96%, 98%)",
-      "hsl(343, 96%, 94.51%)",
-      "hsl(343, 96%, 90.88%)",
-      "hsl(343, 96%, 87.11%)",
-      "hsl(343, 96%, 83.17%)",
-      "hsl(343, 96%, 79%)"
+      "hsl(343, 96%, 97.8%)",
+      "hsl(343, 96%, 95%)",
+      "hsl(343, 96%, 91.5%)",
+      "hsl(343, 96%, 86.5%)",
+      "hsl(343, 96%, 80.5%)",
+      "hsl(343, 96%, 73%)"
     ];
 
     const chartWidth = stageWidth - margin.left - margin.right;
@@ -333,12 +333,12 @@ function drawCountryCostChart(transitionMode) {
 
     // const alphas = [0.1, 0.186, 0.313, 0.486, 0.712, 1.0];
     const colors = [
-      "hsl(343, 96%, 98%)",
-      "hsl(343, 96%, 94.51%)",
-      "hsl(343, 96%, 90.88%)",
-      "hsl(343, 96%, 87.11%)",
-      "hsl(343, 96%, 83.17%)",
-      "hsl(343, 96%, 79%)"
+      "hsl(343, 96%, 97.8%)",
+      "hsl(343, 96%, 95%)",
+      "hsl(343, 96%, 91.5%)",
+      "hsl(343, 96%, 86.5%)",
+      "hsl(343, 96%, 80.5%)",
+      "hsl(343, 96%, 73%)"
     ];
 
     data.forEach((country, i) => {
@@ -1335,7 +1335,7 @@ const maxdifference = Math.max(...differences);
 
 
   // Kreise
-  nodes.forEach(node => {
+  nodes.forEach((node, index) => {
     let difference = Math.abs(node.rIncome - node.rCost);
     node.border = gmynd.map(
     Math.sqrt(Math.max(0, difference)),
@@ -1362,30 +1362,33 @@ const maxdifference = Math.max(...differences);
       // income > cost, zeichen income Kreis vor cost Kreis
       incomeCircle = document.createElement("div");
       incomeCircle.className = "overview-circle-green";
-      incomeCircle.style.width = incomeCircle.style.height = `${node.rIncome}px`;
+      incomeCircle.style.width = incomeCircle.style.height = "0px";
       incomeCircle.style.left = incomeCircle.style.top = "50%";
       incomeCircle.style.transform = "translate(-50%, -50%)";
-      incomeCircle.style.border = `${node.border}px solid #02947B`;
+      incomeCircle.style.border = "0px solid #02947B";
       incomeCircle.style.opacity = "0.5";
+      incomeCircle.style.transition = "width 0.6s ease-out, height 0.6s ease-out, border-width 0.6s ease-out";
       group.appendChild(incomeCircle);
     } else {
       // income < cost, zeichen cost Kreis vor income Kreis
       costCircle = document.createElement("div");
       costCircle.className = "overview-circle-pink";
-      costCircle.style.width = costCircle.style.height = `${node.rCost}px`;
+      costCircle.style.width = costCircle.style.height = "0px";
       costCircle.style.left = costCircle.style.top = "50%";
       costCircle.style.transform = "translate(-50%, -50%)";
-      costCircle.style.border = `${node.border}px solid #FD96B3`;
+      costCircle.style.border = "0px solid #FD96B3";
       costCircle.style.opacity = "0.4";
+      costCircle.style.transition = "width 0.6s ease-out, height 0.6s ease-out, border-width 0.6s ease-out";
       group.appendChild(costCircle);
     }
 
     // Unterernährung
     let underCircle = document.createElement("div");
     underCircle.className = "overview-circle-unter";
-    underCircle.style.width = underCircle.style.height = `${node.rUnter}px`;
+    underCircle.style.width = underCircle.style.height = "0px";
     underCircle.style.left = underCircle.style.top = "50%";
     underCircle.style.transform = "translate(-50%, -50%)";
+    underCircle.style.transition = "width 0.6s ease-out, height 0.6s ease-out";
     group.appendChild(underCircle);
 
     // tooltip Interaktion
@@ -1408,8 +1411,24 @@ const maxdifference = Math.max(...differences);
     });
 
     document.querySelector("#renderer").appendChild(group);
+      
+    // Verzögerung für sanfte Animation
+    setTimeout(() => {
+      if (incomeCircle) {
+        incomeCircle.style.width = incomeCircle.style.height = `${node.rIncome}px`;
+        incomeCircle.style.borderWidth = `${node.border}px`;
+      }
+      if (costCircle) {
+        costCircle.style.width = costCircle.style.height = `${node.rCost}px`;
+        costCircle.style.borderWidth = `${node.border}px`;
+      }
+      if (underCircle) {
+        underCircle.style.width = underCircle.style.height = `${node.rUnter}px`;
+      }
+    }, index * 0);
   });
 }
+
 
 // ----------- tooltip & boundary adjustment -----------
 function positionTooltip(event, tooltip, offsetX = 10, offsetY = 10) {
