@@ -144,15 +144,13 @@ function switchPage(mode) {
     const dots = document.querySelectorAll(".bar-to-dot");
     if (dots.length > 0) {
       renderTopArea("bar");
-
-      // 按 TagGNI 排序，和 bar 顺序一致
       const data = getDataSortedByIncome();
       const chartWidth = stageWidth - margin.left - margin.right;
       const chartHeight = stageHeight - margin.top - margin.bottom;
       const gap = 6;
       const barWidth = (chartWidth - gap * (data.length - 1)) / data.length;
       const maxCost = Math.max(...data.map(d => parseFloat(d["Cost"])));
-      // 动画 dot->bar
+      // animation dot->bar
       dots.forEach((dot, i) => {
         const cost = parseFloat(data[i]["Cost"]);
         const barHeight = gmynd.map(cost, 0, maxCost, 0, chartHeight);
@@ -174,7 +172,6 @@ function switchPage(mode) {
     renderTopArea("bar");
     drawCountryCostChart();
   } else if (mode === "afford") {
-    // 初始化 scatter 字段
     if (!barToScatterUltraSmoothTransition.currentScatterField) {
       barToScatterUltraSmoothTransition.currentScatterField = "Vergleich";
       barToScatterUltraSmoothTransition.prevRField = "Vergleich";
