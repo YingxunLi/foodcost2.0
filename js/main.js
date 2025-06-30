@@ -140,7 +140,7 @@ function switchPage(mode) {
   if (mode === "bar") {
     currentField = "Cost";
     currentTopField = "Cost";
-    // --- 新增：scatter->bar 动画 ---
+    // scatter->bar
     const dots = document.querySelectorAll(".bar-to-dot");
     if (dots.length > 0) {
       renderTopArea("bar");
@@ -164,7 +164,6 @@ function switchPage(mode) {
         dot.style.top = `${yPos}px`;
         dot.style.borderRadius = "0";
       });
-      // 动画结束后再渲染 bar 并清理 dots
       setTimeout(() => {
         // Vollständige Bereinigung aller scatter-bezogenen Elemente
         document.querySelectorAll(".bar-to-dot").forEach(el => el.remove());
@@ -505,7 +504,6 @@ function drawCountryCostChart(transitionMode) {
       bar.style.top = `${yPos}px`;
       bar.style.position = "absolute";
       bar.style.transition = "height 0.5s, top 0.5s";
-      // 不再设置 backgroundColor
       document.querySelector("#renderer").appendChild(bar);
       bars.push(bar);
     });
@@ -542,7 +540,7 @@ function drawCountryCostChart(transitionMode) {
       const barHeightCost = gmynd.map(cost, 0, maxIncome, 0, chartHeight);
       const xPos = margin.left + i * (barWidth + gap);
 
-      // income bar（灰色，目标是 ratio 的 100% bar）
+      // income bar（Ziel: ratio100% bar）
       let barBg = document.createElement("div");
       barBg.classList.add("bar", "ratio-bg");
       barBg.style.width = `${barWidth}px`;
@@ -551,11 +549,10 @@ function drawCountryCostChart(transitionMode) {
       barBg.style.top = `${margin.top + (chartHeight - barHeightIncome)}px`;
       barBg.style.position = "absolute";
       barBg.style.transition = "height 0.5s, top 0.5s";
-      // 不再设置背景Color
       document.querySelector("#renderer").appendChild(barBg);
       bars.push(barBg);
 
-      // cost bar（粉色，目标是 ratio 的 vergleich bar）
+      // cost bar（Ziel: ratio vergleich bar）
       let pinkBar = document.createElement("div");
       pinkBar.classList.add("bar", "ratio-fg");
       pinkBar.style.width = `${barWidth}px`;
@@ -564,7 +561,6 @@ function drawCountryCostChart(transitionMode) {
       pinkBar.style.top = `${margin.top + (chartHeight - barHeightCost)}px`;
       pinkBar.style.position = "absolute";
       pinkBar.style.transition = "height 0.5s, top 0.5s";
-      // 不再设置背景Color
       document.querySelector("#renderer").appendChild(pinkBar);
       bars.push(pinkBar);
     });
@@ -572,16 +568,16 @@ function drawCountryCostChart(transitionMode) {
     // Erzwinge Reflow
     void document.querySelector("#renderer").offsetHeight;
 
-    // income bar 过渡到 ratio 的 100% bar，cost bar 过渡到 ratio 的 vergleich bar
+    // income bar - ratio 100% bar，cost bar - ratio  vergleich bar
     data.forEach((country, i) => {
-      // 灰色底bar
+      // grau
       const barHeightBg = gmynd.map(100, 0, maxVergleich, 0, chartHeight);
       const yPosBg = margin.top + (chartHeight - barHeightBg);
       const barBg = bars[i * 2];
       barBg.style.height = `${barHeightBg}px`;
       barBg.style.top = `${yPosBg}px`;
 
-      // 粉色bar
+      // pink
       const vergleich = parseFloat(country["Vergleich"]);
       const barHeightPink = gmynd.map(vergleich, 0, maxVergleich, 0, chartHeight);
       const yPosPink = margin.top + (chartHeight - barHeightPink);
@@ -1439,12 +1435,10 @@ function positionTooltip(event, tooltip, offsetX = 10, offsetY = 10) {
   let left = event.clientX + offsetX;
   let top = event.clientY + offsetY;
 
-  // 如果超出右边界，往左显示
   if (left + tooltipRect.width > rendererRect.right) {
     left = event.clientX - tooltipRect.width - offsetX;
     if (left < rendererRect.left) left = rendererRect.left;
   }
-  // 如果超出下边界，往上显示
   if (top + tooltipRect.height > rendererRect.bottom) {
     top = event.clientY - tooltipRect.height - offsetY;
     if (top < rendererRect.top) top = rendererRect.top;
