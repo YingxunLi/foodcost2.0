@@ -367,8 +367,11 @@ function drawCountryCostChart(transitionMode) {
         });
         bar.addEventListener('mousemove', (event) => {
           positionTooltip(event, tooltip);
-          bar.classList.remove('active');
         });
+        bar.addEventListener('mouseleave', () => {
+          tooltip.style.display = "none";
+          bar.classList.remove('active');
+      });
 
         let value = parseFloat(country[selectedFoodKey]);
         let barHeight = gmynd.map(value, 0, maxCost, 0, chartHeight);
@@ -603,7 +606,7 @@ function drawCountryCostChart(transitionMode) {
       const barHeightPink = gmynd.map(vergleich, 0, maxVergleich, 0, chartHeight);
       const xPos = margin.left + i * (barWidth + gap);
 
-      // 灰色底bar
+      // grau bar
       let barBg = document.createElement("div");
       barBg.classList.add("bar", "ratio-bg");
       barBg.style.width = `${barWidth}px`;
@@ -612,11 +615,10 @@ function drawCountryCostChart(transitionMode) {
       barBg.style.top = `${margin.top + (chartHeight - barHeightGray)}px`;
       barBg.style.position = "absolute";
       barBg.style.transition = "height 0.5s, top 0.5s";
-      // 不再设置背景Color
       document.querySelector("#renderer").appendChild(barBg);
       bars.push(barBg);
 
-      // 粉色bar
+      // pink bar
       let pinkBar = document.createElement("div");
       pinkBar.classList.add("bar", "ratio-fg");
       pinkBar.style.width = `${barWidth}px`;
@@ -625,7 +627,6 @@ function drawCountryCostChart(transitionMode) {
       pinkBar.style.top = `${margin.top + (chartHeight - barHeightPink)}px`;
       pinkBar.style.position = "absolute";
       pinkBar.style.transition = "height 0.5s, top 0.5s";
-      // 不再设置背景Color
       document.querySelector("#renderer").appendChild(pinkBar);
       bars.push(pinkBar);
     });
@@ -633,7 +634,7 @@ function drawCountryCostChart(transitionMode) {
     // Erzwinge Reflow
     void document.querySelector("#renderer").offsetHeight;
 
-    // 灰色bar过渡到income bar，粉色bar过渡到cost bar（以income最大值映射）
+    // animation: ratio bar - income bar
     data.forEach((country, i) => {
       const income = parseFloat(country["TagGNI"]);
       const cost = parseFloat(country["Cost"]);
@@ -656,7 +657,6 @@ function drawCountryCostChart(transitionMode) {
     return;
   }
 
-  // ...existing code for data.forEach...
   data.forEach((country, i) => {
     const cost = parseFloat(country["Cost"]);
     const income = parseFloat(country["TagGNI"]);
@@ -747,7 +747,6 @@ function drawCountryCostChart(transitionMode) {
         barBg.style.left = `${xPos}px`;
         barBg.style.top = `${margin.top + (chartHeight - gmynd.map(100, 0, maxVergleich, 0, chartHeight))}px`;
         barBg.style.position = "absolute";
-        // 不再设置背景Color
         document.querySelector("#renderer").appendChild(barBg);
       }
 
@@ -765,16 +764,12 @@ function drawCountryCostChart(transitionMode) {
         if (currentField === "TagGNI") val = `$${fieldValue.toFixed(2)}`;
         tooltip.innerText = `${country["Country Name"]}: ${val}`;
         tooltip.style.display = "block";
-        const barRect = bar.getBoundingClientRect();
-        tooltip.style.left = `${barRect.right + 10}px`;
-        tooltip.style.top = `${barRect.top}px`;
+        positionTooltip(event, tooltip);
         bars.forEach(b => b.classList.remove('active'));
         bar.classList.add('active');
       });
       bar.addEventListener('mousemove', () => {
-        const barRect = bar.getBoundingClientRect();
-        tooltip.style.left = `${barRect.right + 10}px`;
-        tooltip.style.top = `${barRect.top}px`;
+        positionTooltip(event, tooltip);
       });
       bar.addEventListener('mouseleave', () => {
         tooltip.style.display = "none";
@@ -783,7 +778,7 @@ function drawCountryCostChart(transitionMode) {
           b.style.backgroundColor = b.dataset.baseColor;
         });
       });
-
+    
       document.querySelector("#renderer").appendChild(bar);
       bars.push(bar);
     } else {
@@ -807,16 +802,11 @@ function drawCountryCostChart(transitionMode) {
       bar.addEventListener('mouseenter', () => {
         tooltip.innerText = `${country["Country Name"]}: ${cost.toFixed(2)}`;
         tooltip.style.display = "block";
-        const barRect = bar.getBoundingClientRect();
-        tooltip.style.left = `${barRect.right + 10}px`;
-        tooltip.style.top = `${barRect.top}px`;
-
+        positionTooltip(event, tooltip);
         bar.classList.add('active');
       });
       bar.addEventListener('mousemove', () => {
-        const barRect = bar.getBoundingClientRect();
-        tooltip.style.left = `${barRect.right + 10}px`;
-        tooltip.style.top = `${barRect.top}px`;
+        positionTooltip(event, tooltip);
       });
       bar.addEventListener('mouseleave', () => {
         tooltip.style.display = "none";
@@ -913,8 +903,8 @@ function barToScatterUltraSmoothTransition() {
   for (let i = 0; i < xTicks; i++) {
   const startT = i / xTicks;
   const endT = (i + 1) / xTicks;
-  
-  // 在每两个主要刻度之间添加5个小点
+
+  // kleine Striche zwischen den Hauptstrichen
   for (let j = 1; j <= 5; j++) {
     const minorT = startT + (endT - startT) * (j / 6); // 6份中的第j份
     const logMinX = Math.log10(minX);
@@ -960,7 +950,7 @@ function barToScatterUltraSmoothTransition() {
   const startT = i / yTicks;
   const endT = (i + 1) / yTicks;
   
-  // 在每两个主要刻度之间添加5个小点
+  // kleine Striche zwischen den Hauptstrichen
   for (let j = 1; j <= 5; j++) {
     const minorT = startT + (endT - startT) * (j / 6); // 6份中的第j份
     const logMinY = Math.log10(minY);
@@ -977,7 +967,7 @@ function barToScatterUltraSmoothTransition() {
 }
 
   if (!barToScatterUltraSmoothTransition.hasEnteredScatter) {
-    // 先画bar，后变成dot
+    // bar zuerst zeichnen dann dot 
     let barDots = [];
     let startStates = [];
     let endStates = [];
@@ -987,7 +977,7 @@ function barToScatterUltraSmoothTransition() {
       const xPos = margin.left + i * (barWidth + gap);
       const yPos = margin.top + (chartHeight - barHeight);
 
-      // 目标位置和大小
+      // Position
       const logMinX = Math.log10(minX);
       const logMaxX = Math.log10(maxX);
       const logMinY = Math.log10(minY);
@@ -1012,12 +1002,12 @@ function barToScatterUltraSmoothTransition() {
       label.className = "dot-label";
       label.style.display = "none";
       // bar.appendChild(label);
-      document.querySelector("#renderer").appendChild(label); // 添加这行
+      //label recht oben
+      document.querySelector("#renderer").appendChild(label); 
       bar._dotLabel = label;
 
-      // 记录起始和目标状态
       bar.style.transition = "none";
-      void bar.offsetHeight;  // 强制reflow
+      void bar.offsetHeight;
       bar.style.transition = "width 0.9s cubic-bezier(0.4, 0, 0.2, 1), height 0.9s cubic-bezier(0.4, 0, 0.2, 1), left 0.9s cubic-bezier(0.4, 0, 0.2, 1), top 0.9s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.9s cubic-bezier(0.4, 0, 0.2, 1)";
       startStates.push({
         width: barWidth,
@@ -1035,7 +1025,6 @@ function barToScatterUltraSmoothTransition() {
       });
     });
 
-    // 绑定交互
     data.forEach((country, i) => {
       let bar = barDots[i];
       let label = bar._dotLabel;
@@ -1073,10 +1062,8 @@ function barToScatterUltraSmoothTransition() {
       };
     });
 
-    // 强制reflow
     void document.querySelector("#renderer").offsetHeight;
 
-    // 设置目标状态，触发动画
     barDots.forEach((bar, i) => {
       const e = endStates[i];
       bar.style.width = `${e.width}px`;
@@ -1086,15 +1073,13 @@ function barToScatterUltraSmoothTransition() {
       bar.style.borderRadius = `${e.borderRadius}px`;
     });
 
-    // 标记已进入scatter
     barToScatterUltraSmoothTransition.hasEnteredScatter = true;
     return;
   }
 
-  // 已在scatter页面，切换字段时，仅变大小
+  // zwischen dot: nur Gross ändern
   const existingDots = document.querySelectorAll(".bar-to-dot");
 
-  // 重新绘制所有散点，带动画，仅变大小
   let dots = [];
   let prevRField = barToScatterUltraSmoothTransition.prevRField || rField;
   const prevMinR = Math.min(...data.map(d => parseFloat(d[prevRField])));
@@ -1108,9 +1093,9 @@ function barToScatterUltraSmoothTransition() {
     const x = gmynd.map(Math.log10(parseFloat(country["TagGNI"])), logMinX, logMaxX, 0, chartWidth);
     const y = gmynd.map(Math.log10(parseFloat(country["Cost"])), logMinY, logMaxY, chartHeight, 0);
 
-    // 上一次的半径
+    // alt radius
     const prevR = gmynd.map(parseFloat(country[prevRField]), prevMinR, prevMaxR, 20, 160);
-    // 目标半径
+    // ziel radius
     const r = gmynd.map(parseFloat(country[rField]), minR, maxR, 20, 160);
 
     let dot = document.createElement("div");
@@ -1124,18 +1109,15 @@ function barToScatterUltraSmoothTransition() {
     document.querySelector("#renderer").appendChild(dot);
     // dots.push({ dot, x, y, prevR, r });
 
-    // 新增：label容器，初始隐藏
+    // label continer
     let label = document.createElement("div");
     label.className = "dot-label";
     label.style.display = "none";
     // dot.appendChild(label);
     document.querySelector("#renderer").appendChild(label);
-
-    // document.querySelector("#renderer").appendChild(dot);
     dots.push({ dot, x, y, prevR, r, label });
   });
 
-  // 绑定交互
   data.forEach((country, i) => {
   let bar = dots[i].dot;
   let label = dots[i].label;
@@ -1169,26 +1151,22 @@ function barToScatterUltraSmoothTransition() {
   };
 });
 
-  // 强制reflow
   void document.querySelector("#renderer").offsetHeight;
 
-  // 更新目标尺寸
   dots.forEach(({ dot, x, y, r }) => {
     dot.style.width = `${r}px`;
     dot.style.height = `${r}px`;
-    dot.style.left = `${margin.left + x - r / 2}px`;
+    dot.style.left = `${margin.left + s + x - r / 2}px`;
     dot.style.top = `${margin.top + y - r / 2}px`;
   });
 
-  // 记录字段
   if (barToScatterUltraSmoothTransition.prevRField !== rField) {
     barToScatterUltraSmoothTransition.prevRField = rField;
   }
 }
 
-// ====== 新增：辅助线和标注函数 ======
+// hover-guide line
 function drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY) {
-  // 计算圆心坐标
   const logMinX = Math.log10(minX);
   const logMaxX = Math.log10(maxX);
   const logMinY = Math.log10(minY);
@@ -1196,10 +1174,9 @@ function drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, m
   const x = gmynd.map(Math.log10(parseFloat(country["TagGNI"])), logMinX, logMaxX, 0, chartWidth);
   const y = gmynd.map(Math.log10(parseFloat(country["Cost"])), logMinY, logMaxY, chartHeight, 0);
 
-  // 先移除之前的轴点、数字和连线
+  // alte weg
   removeScatterHoverAxes();
 
-  // 连线
   let vLine = document.createElement("div");
   vLine.id = "scatter-hover-vline";
   vLine.style.left = `${margin.left + x}px`;
@@ -1214,7 +1191,6 @@ function drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, m
   hLine.style.width = `${x}px`;
   document.querySelector("#renderer").appendChild(hLine);
 
-  // x轴数值标注
   let xLabel = document.createElement("div");
   xLabel.id = "scatter-hover-xlabel";
   xLabel.style.left = `${margin.left + x - 30}px`;
@@ -1222,7 +1198,6 @@ function drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, m
   xLabel.textContent = `Income: $${parseFloat(country["TagGNI"]).toFixed(2)}`;
   document.querySelector("#renderer").appendChild(xLabel);
 
-  // y轴数值标注
   let yLabel = document.createElement("div");
   yLabel.id = "scatter-hover-ylabel";
   yLabel.style.left = `${margin.left - 60}px`;
