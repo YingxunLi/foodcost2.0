@@ -1,6 +1,6 @@
 let stageHeight;
 let stageWidth;
-const margin = { top: 176, right: 80, bottom: 88, left: 80 }; 
+const margin = { top: 176, right: 80, bottom: 88, left: 80 };
 
 // ----------- recht Button ----------- 
 const topFields = [
@@ -43,7 +43,7 @@ function renderTopArea(mode) {
   // left button container
   let leftArea = document.createElement("div");
   leftArea.className = "left-area";
- 
+
   // main button
   const mainBtns = [
     { key: "bar", label: "Cost vs Income", class: ["top-btn", "main"] },
@@ -121,14 +121,14 @@ function renderTopArea(mode) {
 
   btnRow.appendChild(leftArea);
   btnRow.appendChild(rightArea);
-  topArea.appendChild(btnRow);  
+  topArea.appendChild(btnRow);
   renderer.parentNode.appendChild(topArea);
 }
 
 // ----------- switch mode ----------- 
 function switchPage(mode) {
   currentPage = mode;
-  
+
   // State-Reset für alle Modi außer afford
   if (mode !== "afford") {
     // Reset scatter state when leaving affordability
@@ -136,7 +136,7 @@ function switchPage(mode) {
     barToScatterUltraSmoothTransition.currentScatterField = "Vergleich";
     barToScatterUltraSmoothTransition.prevRField = "Vergleich";
   }
-  
+
   if (mode === "bar") {
     currentField = "Cost";
     currentTopField = "Cost";
@@ -144,6 +144,7 @@ function switchPage(mode) {
     const dots = document.querySelectorAll(".bar-to-dot");
     if (dots.length > 0) {
       renderTopArea("bar");
+
       const data = getDataSortedByIncome();
       const chartWidth = stageWidth - margin.left - margin.right;
       const chartHeight = stageHeight - margin.top - margin.bottom;
@@ -260,41 +261,41 @@ function drawCountryCostChart(transitionMode) {
           drawCountryCostChart();
         }
       },
-    ...foodAverages.map((food, idx) => ({
-      key: food.key,
-      // color: `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`,
-      color: colors[idx],
-      selected: selectedFoodKey === food.key,
-      onClick: () => {
-        selectedFoodKey = selectedFoodKey === food.key ? null : food.key;
-        drawCountryCostChart();
-      }
-    }))
-  ];
+      ...foodAverages.map((food, idx) => ({
+        key: food.key,
+        // color: `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`,
+        color: colors[idx],
+        selected: selectedFoodKey === food.key,
+        onClick: () => {
+          selectedFoodKey = selectedFoodKey === food.key ? null : food.key;
+          drawCountryCostChart();
+        }
+      }))
+    ];
 
-  legendItems.forEach(itemData => {
-    let item = document.createElement("div");
-    item.className = "legend-item" + (itemData.selected ? " selected" : "");
-    let colorBox = document.createElement("span");
-    colorBox.className = "legend-color";
-    colorBox.style.background = itemData.color;
-    item.appendChild(colorBox);
-    let label = document.createElement("span");
-    label.textContent = itemData.key;
-    item.appendChild(label);
-    item.onclick = itemData.onClick;
-    legendArea.appendChild(item);
-  });
-  renderer.parentNode.appendChild(legendArea);
+    legendItems.forEach(itemData => {
+      let item = document.createElement("div");
+      item.className = "legend-item" + (itemData.selected ? " selected" : "");
+      let colorBox = document.createElement("span");
+      colorBox.className = "legend-color";
+      colorBox.style.background = itemData.color;
+      item.appendChild(colorBox);
+      let label = document.createElement("span");
+      label.textContent = itemData.key;
+      item.appendChild(label);
+      item.onclick = itemData.onClick;
+      legendArea.appendChild(item);
+    });
+    renderer.parentNode.appendChild(legendArea);
   } else {
     // income & ratio brauchen keine legend
     let oldLegend = document.getElementById("food-legend-area");
     if (oldLegend) oldLegend.remove();
     selectedFoodKey = null;
   }
-    
+
   // cost-bar-area
-  const data = getDataSortedByIncome();  
+  const data = getDataSortedByIncome();
   const chartWidth = stageWidth - margin.left - margin.right;
   const chartHeight = stageHeight - margin.top - margin.bottom;
   const gap = 6;
@@ -354,7 +355,7 @@ function drawCountryCostChart(transitionMode) {
         bar.style.height = `${totalBarHeight}px`;
         bar.style.transition = "height 0.5s, top 0.5s";
         document.querySelector("#renderer").appendChild(bar);
-          
+
         bar.addEventListener('mouseenter', (event) => {
           tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>Total Cost: $${total.toFixed(2)}`;
           tooltip.style.display = "block";
@@ -367,7 +368,7 @@ function drawCountryCostChart(transitionMode) {
         bar.addEventListener('mouseleave', () => {
           tooltip.style.display = "none";
           bar.classList.remove('active');
-      });
+        });
 
         let value = parseFloat(country[selectedFoodKey]);
         let barHeight = gmynd.map(value, 0, maxCost, 0, chartHeight);
@@ -400,8 +401,8 @@ function drawCountryCostChart(transitionMode) {
           barTopDiv.classList.remove('active');
         });
 
-      document.querySelector("#renderer").appendChild(barTopDiv);
-    } else {
+        document.querySelector("#renderer").appendChild(barTopDiv);
+      } else {
         foodAverages.forEach((food, idx) => {
           const value = parseFloat(country[food.key]);
           const barHeight = gmynd.map(value, 0, maxCost, 0, chartHeight);
@@ -416,7 +417,7 @@ function drawCountryCostChart(transitionMode) {
           seg.style.width = `${barWidth}px`;
           seg.style.height = `${barHeight}px`;
           // seg.style.background = `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`;
-          seg.style.background = colors[idx]; 
+          seg.style.background = colors[idx];
           seg.style.transition = "height 0.5s, top 0.5s";
 
           seg.addEventListener("mouseenter", (event) => {
@@ -480,10 +481,8 @@ function drawCountryCostChart(transitionMode) {
     setTimeout(() => {
       drawCountryCostChart();
     }, 500);
-
     return;
   }
-
   // cost->ratio
   if (transitionMode === "costToRatio") {
     // Zuerst cost-Balken rendern (mit cost-Maximalwert abbilden)
@@ -771,7 +770,7 @@ function drawCountryCostChart(transitionMode) {
           b.style.backgroundColor = b.dataset.baseColor;
         });
       });
-    
+
       document.querySelector("#renderer").appendChild(bar);
       bars.push(bar);
     } else {
@@ -849,6 +848,28 @@ function barToScatterUltraSmoothTransition() {
 
   // Daten vorbereiten
   const data = getDataSortedByIncome();
+
+  // 收入分类
+  const incomes = data.map(d => parseFloat(d["TagGNI"]));
+  const minIncome = Math.min(...incomes);
+  const maxIncome = Math.max(...incomes);
+  // 三等分收入范围
+  const lowThreshold = minIncome + (maxIncome - minIncome) * 0.33;
+  const highThreshold = minIncome + (maxIncome - minIncome) * 0.67;
+
+  function getIncomeCategory(income) {
+    if (income <= lowThreshold) return 'low';
+    if (income <= highThreshold) return 'medium';
+    return 'high';
+  }
+
+  // 定义颜色
+  const incomeColors = {
+    low: 'rgba(253, 150, 179, 1)',     // 淡粉色 - 低收入
+    medium: 'rgba(2, 148, 123, 0.9)',  // 中粉色 - 中等收入  
+    high: 'rgba(2, 148, 123, 0.9)'      // 绿色 - 高收入
+  };
+
   // console.log("data", data); 
   const yAxisSpace = 60;
   const chartWidth = stageWidth - margin.left - margin.right - yAxisSpace;
@@ -895,24 +916,24 @@ function barToScatterUltraSmoothTransition() {
   }
 
   for (let i = 0; i < xTicks; i++) {
-  const startT = i / xTicks;
-  const endT = (i + 1) / xTicks;
+    const startT = i / xTicks;
+    const endT = (i + 1) / xTicks;
 
-  // kleine Striche zwischen den Hauptstrichen
-  for (let j = 1; j <= 5; j++) {
-    const minorT = startT + (endT - startT) * (j / 6); 
-    const logMinX = Math.log10(minX);
-    const logMaxX = Math.log10(maxX);
-    const logVal = logMinX + minorT * (logMaxX - logMinX);
-    const x = gmynd.map(logVal, logMinX, logMaxX, 0, chartWidth);
+    // kleine Striche zwischen den Hauptstrichen
+    for (let j = 1; j <= 5; j++) {
+      const minorT = startT + (endT - startT) * (j / 6);
+      const logMinX = Math.log10(minX);
+      const logMaxX = Math.log10(maxX);
+      const logVal = logMinX + minorT * (logMaxX - logMinX);
+      const x = gmynd.map(logVal, logMinX, logMaxX, 0, chartWidth);
 
-    let minorTick = document.createElement("div");
-    minorTick.className = "axis-x-tick axis-x-minor-tick";
-    minorTick.style.left = `${margin.left + yAxisSpace + x - 2}px`;
-    minorTick.style.top = `${margin.top + chartHeight - 2 + 2}px`;
-    document.querySelector("#renderer").appendChild(minorTick);
+      let minorTick = document.createElement("div");
+      minorTick.className = "axis-x-tick axis-x-minor-tick";
+      minorTick.style.left = `${margin.left + yAxisSpace + x - 2}px`;
+      minorTick.style.top = `${margin.top + chartHeight - 2 + 2}px`;
+      document.querySelector("#renderer").appendChild(minorTick);
+    }
   }
-}
   // Y 
   const yTicks = 5;
   for (let i = 0; i <= yTicks; i++) {
@@ -938,27 +959,27 @@ function barToScatterUltraSmoothTransition() {
     label.className = "axis-y-tick-label";
     label.textContent = val.toFixed(2);
     document.querySelector("#renderer").appendChild(label);
-  } 
+  }
 
   for (let i = 0; i < yTicks; i++) {
-  const startT = i / yTicks;
-  const endT = (i + 1) / yTicks;
-  
-  // kleine Striche zwischen den Hauptstrichen
-  for (let j = 1; j <= 5; j++) {
-    const minorT = startT + (endT - startT) * (j / 6);
-    const logMinY = Math.log10(minY);
-    const logMaxY = Math.log10(maxY);
-    const logVal = logMinY + minorT * (logMaxY - logMinY);
-    const y = gmynd.map(logVal, logMinY, logMaxY, chartHeight, 0);
+    const startT = i / yTicks;
+    const endT = (i + 1) / yTicks;
 
-    let minorTick = document.createElement("div");
-    minorTick.className = "axis-y-tick axis-y-minor-tick";
-    minorTick.style.left = `${margin.left + yAxisSpace - 4}px`;
-    minorTick.style.top = `${margin.top + y - 2}px`;
-    document.querySelector("#renderer").appendChild(minorTick);
+    // kleine Striche zwischen den Hauptstrichen
+    for (let j = 1; j <= 5; j++) {
+      const minorT = startT + (endT - startT) * (j / 6);
+      const logMinY = Math.log10(minY);
+      const logMaxY = Math.log10(maxY);
+      const logVal = logMinY + minorT * (logMaxY - logMinY);
+      const y = gmynd.map(logVal, logMinY, logMaxY, chartHeight, 0);
+
+      let minorTick = document.createElement("div");
+      minorTick.className = "axis-y-tick axis-y-minor-tick";
+      minorTick.style.left = `${margin.left + yAxisSpace - 4}px`;
+      minorTick.style.top = `${margin.top + y - 2}px`;
+      document.querySelector("#renderer").appendChild(minorTick);
+    }
   }
-}
 
   if (!barToScatterUltraSmoothTransition.hasEnteredScatter) {
     // bar zuerst zeichnen dann dot 
@@ -988,6 +1009,12 @@ function barToScatterUltraSmoothTransition() {
       bar.style.left = `${xPos}px`;
       bar.style.top = `${yPos}px`;
       bar.style.cursor = "pointer";
+
+      // 添加收入分类颜色
+      const income = parseFloat(country["TagGNI"]);
+      const category = getIncomeCategory(income);
+      bar.style.backgroundColor = incomeColors[category];
+
       bar.style.transition = "width 0.9s cubic-bezier(0.4, 0, 0.2, 1), height 0.9s cubic-bezier(0.4, 0, 0.2, 1), left 0.9s cubic-bezier(0.4, 0, 0.2, 1), top 0.9s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.9s cubic-bezier(0.4, 0, 0.2, 1)";
       document.querySelector("#renderer").appendChild(bar);
       barDots.push(bar);
@@ -997,7 +1024,7 @@ function barToScatterUltraSmoothTransition() {
       label.style.display = "none";
       // bar.appendChild(label);
       //label recht oben
-      document.querySelector("#renderer").appendChild(label); 
+      document.querySelector("#renderer").appendChild(label);
       bar._dotLabel = label;
 
       bar.style.transition = "none";
@@ -1023,25 +1050,25 @@ function barToScatterUltraSmoothTransition() {
       let bar = barDots[i];
       let label = bar._dotLabel;
       bar.onmouseenter = () => {
-          let field = barToScatterUltraSmoothTransition.currentScatterField;
-          let value = country[field];
-          value = parseFloat(value);
-          value = value.toFixed(2);
-          let fieldLabel = {
-            "Vergleich": "Ratio",
-            "Percent cannot afford": "Unaffordability",
-            "Unterernährung": "Malnutrition"
-          }[field] || field;
-          label.innerHTML = `<b>${country["Country Name"]}</b><br>${fieldLabel}: ${value}%`;
-          label.style.display = "block";
+        let field = barToScatterUltraSmoothTransition.currentScatterField;
+        let value = country[field];
+        value = parseFloat(value);
+        value = value.toFixed(2);
+        let fieldLabel = {
+          "Vergleich": "Ratio",
+          "Percent cannot afford": "Unaffordability",
+          "Unterernährung": "Malnutrition"
+        }[field] || field;
+        label.innerHTML = `<b>${country["Country Name"]}</b><br>${fieldLabel}: ${value}%`;
+        label.style.display = "block";
 
-          label.style.right = `${margin.right}px`;
-          label.style.top = `${margin.top}px`;
+        label.style.right = `${margin.right}px`;
+        label.style.top = `${margin.top}px`;
 
-          drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY, yAxisSpace);
-          document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label, .axis-x-minor-tick, .axis-y-minor-tick').forEach(el => {
-            el.classList.add('show');
-          });
+        drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY, yAxisSpace);
+        document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label, .axis-x-minor-tick, .axis-y-minor-tick').forEach(el => {
+          el.classList.add('show');
+        });
       };
       bar.onmousemove = () => {
         tooltip.style.left = `${bar.getBoundingClientRect().right + 10}px`;
@@ -1051,7 +1078,7 @@ function barToScatterUltraSmoothTransition() {
         label.style.display = "none";
         document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label, .axis-x-minor-tick, .axis-y-minor-tick').forEach(el => {
           el.classList.remove('show');
-    });
+        });
         removeScatterHoverLines();
       };
     });
@@ -1099,6 +1126,11 @@ function barToScatterUltraSmoothTransition() {
     dot.style.width = `${prevR}px`;
     dot.style.height = `${prevR}px`;
     dot.style.cursor = "pointer";
+    // 添加收入分类颜色
+    const income = parseFloat(country["TagGNI"]);
+    const category = getIncomeCategory(income);
+    dot.style.backgroundColor = incomeColors[category];
+
     dot.style.transition = "width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s cubic-bezier(0.4, 0, 0.2, 1), left 0.6s cubic-bezier(0.4, 0, 0.2, 1), top 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
     document.querySelector("#renderer").appendChild(dot);
     // dots.push({ dot, x, y, prevR, r });
@@ -1113,37 +1145,37 @@ function barToScatterUltraSmoothTransition() {
   });
 
   data.forEach((country, i) => {
-  let bar = dots[i].dot;
-  let label = dots[i].label;
-  bar.onmouseenter = () => {
+    let bar = dots[i].dot;
+    let label = dots[i].label;
+    bar.onmouseenter = () => {
 
-    let field = barToScatterUltraSmoothTransition.currentScatterField;
-    let value = country[field];
-    let fieldLabel = {
-      "Vergleich": "Ratio",
-      "Percent cannot afford": "Unaffordability",
-      "Unterernährung": "Malnutrition"
-    }[field] || field;
-    label.innerHTML = `<b>${country["Country Name"]}</b><br>${fieldLabel}: ${value}%`;
-    label.style.display = "block";
+      let field = barToScatterUltraSmoothTransition.currentScatterField;
+      let value = country[field];
+      let fieldLabel = {
+        "Vergleich": "Ratio",
+        "Percent cannot afford": "Unaffordability",
+        "Unterernährung": "Malnutrition"
+      }[field] || field;
+      label.innerHTML = `<b>${country["Country Name"]}</b><br>${fieldLabel}: ${value}%`;
+      label.style.display = "block";
 
-    label.style.right = `${margin.right}px`;
-    label.style.top = `${margin.top}px`;
+      label.style.right = `${margin.right}px`;
+      label.style.top = `${margin.top}px`;
 
-    drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY, yAxisSpace);
-    document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label, .axis-x-minor-tick, .axis-y-minor-tick').forEach(el => {
-      el.classList.add('show');
-    });
-  };
-  bar.onmouseleave = () => {
-    bar.style.transform = "";
-    label.style.display = "none";
-    document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label, .axis-x-minor-tick, .axis-y-minor-tick').forEach(el => {
-      el.classList.remove('show');
-    });
-    removeScatterHoverLines();
-  };
-});
+      drawScatterHoverLines(country, margin, chartWidth, chartHeight, minX, maxX, minY, maxY, yAxisSpace);
+      document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label, .axis-x-minor-tick, .axis-y-minor-tick').forEach(el => {
+        el.classList.add('show');
+      });
+    };
+    bar.onmouseleave = () => {
+      bar.style.transform = "";
+      label.style.display = "none";
+      document.querySelectorAll('.axis-x-tick, .axis-x-tick-label, .axis-y-tick, .axis-y-tick-label, .axis-x-minor-tick, .axis-y-minor-tick').forEach(el => {
+        el.classList.remove('show');
+      });
+      removeScatterHoverLines();
+    };
+  });
 
   void document.querySelector("#renderer").offsetHeight;
 
@@ -1218,7 +1250,7 @@ function removeScatterHoverLines() {
 // ----------- 📒 Overview Chart ----------- 
 function drawOverviewChart() {
   document.querySelector("#renderer").innerHTML = "";
-    
+
   // unter weg
   let oldLegend = document.getElementById("food-legend-area");
   if (oldLegend) oldLegend.remove();
@@ -1237,9 +1269,9 @@ function drawOverviewChart() {
   const maxUnter = Math.max(...data.map(d => parseFloat(d["Unterernährung"])));
 
   const minCostArea = Math.PI * 100 * 100;
-  const maxCostArea = Math.PI * 220 * 220;
+  const maxCostArea = Math.PI * 200 * 200;
   const minIncomeArea = Math.PI * 100 * 100;
-  const maxIncomeArea = Math.PI * 220 * 220;
+  const maxIncomeArea = Math.PI * 200 * 200;
   const minUnterArea = Math.PI * 10 * 10;
   const maxUnterArea = Math.PI * 75 * 75;
 
@@ -1248,50 +1280,39 @@ function drawOverviewChart() {
     const cost = parseFloat(country.Cost);
     const income = parseFloat(country.TagGNI);
     const unter = parseFloat(country.Unterernährung);
-
-    // const difference = income - cost;
-    // const mindifference = Math.min(...data.map(d => parseFloat(d.TagGNI) - parseFloat(d.Cost)));
-    // const maxdifference = Math.max(...data.map(d => parseFloat(d.TagGNI) - parseFloat(d.Cost)));
-
+    const vergleich = parseFloat(country.Vergleich);
 
     // original radius calculation
     let rCost = Math.sqrt(gmynd.map(cost, minCost, maxCost, minCostArea, maxCostArea) / Math.PI);
     let rIncome = Math.sqrt(gmynd.map(income, minIncome, maxIncome, minIncomeArea, maxIncomeArea) / Math.PI);
     let rUnter = Math.sqrt(gmynd.map(unter, minUnter, maxUnter, minUnterArea, maxUnterArea) / Math.PI);
 
-    // garantieren, dass der Bodenkreis größer是
-    // if (ratio > 50 && rCost <= rIncome) {
-    //   [rCost, rIncome] = [Math.max(rCost, rIncome + 8), Math.min(rCost - 8, rIncome)];
-    // } else if (ratio < 50 && rIncome <= rCost) {
-    //   [rIncome, rCost] = [Math.max(rIncome, rCost + 8), Math.min(rIncome - 8, rCost)];
-    // } 
+    let aCost = gmynd.map(cost, minCost, maxIncome, 0, 250);
+    let aIncome = gmynd.map(income, minCost, maxCost, 0, 250);
+    // let rUnter = gmynd.map(unter, minUnter, maxUnter, 10, 75);
 
     // //log
     const logMinIncome = Math.log10(minIncome);
     const logMaxIncome = Math.log10(maxIncome);
     const xBase = gmynd.map(Math.log10(income), logMinIncome, logMaxIncome, margin.left, margin.left + chartWidth);
-    const x = xBase + (Math.random() - 0.5) * 0; 
+    const x = xBase + (Math.random() - 0.5) * 0;
     const y = margin.top + Math.random() * chartHeight;
 
     return {
       country,
+      cost: cost,
+      income: income,
+      ratio: vergleich,
       rCost,
       rIncome,
       rUnter,
+      aCost,
+      aIncome,
       x,
       y
-      
-      //falls random:
-      //x: margin.left + Math.random() * chartWidth,
-      //y: margin.top + Math.random() * chartHeight
+
     };
   });
-
-  //  difference
-const differences = nodes.map(n => Math.abs(n.rIncome - n.rCost));
-const mindifference = Math.min(...differences);
-const maxdifference = Math.max(...differences);
-
 
   // Vermeidung von Überlappungen durch Kraftfeldsimulation
   function simulate(nodes, iterations = 300) {
@@ -1312,10 +1333,10 @@ const maxdifference = Math.max(...differences);
             // n1.y -= my;
             // n2.x += mx;
             // n2.y += my;
-             // n1.x -= mx;                      // <--- hier auskommentiert
+            // n1.x -= mx;                      // <--- hier auskommentiert
             n1.y -= my * 0.1;                   // <--- hier habe ich den Faktor 0.1 hinzugefügt
             // n2.x += mx;                      // <--- hier auskommentiert
-            n2.y += my * 0.1; 
+            n2.y += my * 0.1;
           }
         }
         // nicht aus dem Chartbereich heraus
@@ -1327,26 +1348,43 @@ const maxdifference = Math.max(...differences);
   simulate(nodes, 300);
 
 
+  //  difference
+  // const differences = nodes.map(n => Math.abs(n.aIncome - n.aCost));
+  // const mindifference = Math.min(...differences);
+  // const maxdifference = Math.max(...differences);
+  const diffs = nodes.map(n => Math.abs(50-n.ratio));
+  const mindiff = Math.min(...diffs);
+  const maxdiff = Math.max(...diffs);
+
   // Kreise
   nodes.forEach((node, index) => {
-    let difference = Math.abs(node.rIncome - node.rCost);
+    let diff = Math.abs(node.ratio - 50);
     node.border = gmynd.map(
-    Math.sqrt(Math.max(0, difference)),
-    Math.sqrt(Math.max(0, mindifference)),
-    Math.sqrt(Math.max(0, maxdifference)),
-    5, 50
-  );
+      // difference,
+      // mindifference,
+      // maxdifference,
+      diff,
+      mindiff,
+      maxdiff,
+      1, 120
+    );
 
-  const d = node.country;
-  const ratio = parseFloat(d.Vergleich);
 
-  // Group Container
-  let group = document.createElement("div");
-  group.style.position = "absolute";
-  group.style.left = `${node.x}px`;
-  group.style.top = `${node.y}px`;
-  group.style.transform = "translate(-50%, -50%)";
-  group.style.cursor = "pointer";
+    const d = node.country;
+    const ratio = parseFloat(d.Vergleich);
+
+    // Group Container
+    let group = document.createElement("div");
+    group.dataset.rIncome= node.rIncome;
+    group.dataset.rCost = node.rCost;
+    group.dataset.income= node.income;
+    group.dataset.cost = node.cost;
+    group.dataset.diff = diff
+    group.style.position = "absolute";
+    group.style.left = `${node.x}px`;
+    group.style.top = `${node.y}px`;
+    group.style.transform = "translate(-50%, -50%)";
+    group.style.cursor = "pointer";
     group.style.width = `${node.rIncome * 1.1}px`;
     group.style.height = `${node.rIncome * 1.1}px`;
 
@@ -1404,16 +1442,18 @@ const maxdifference = Math.max(...differences);
     });
 
     document.querySelector("#renderer").appendChild(group);
-      
+
     // Verzögerung für sanfte Animation
     setTimeout(() => {
       if (incomeCircle) {
         incomeCircle.style.width = incomeCircle.style.height = `${node.rIncome}px`;
         incomeCircle.style.borderWidth = `${node.border}px`;
+        //        incomeCircle.style.borderWidth = `${10}px`;
       }
       if (costCircle) {
         costCircle.style.width = costCircle.style.height = `${node.rCost}px`;
         costCircle.style.borderWidth = `${node.border}px`;
+        //  costCircle.style.borderWidth = `${10}px`;
       }
       if (underCircle) {
         underCircle.style.width = underCircle.style.height = `${node.rUnter}px`;
