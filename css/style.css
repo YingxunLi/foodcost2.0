@@ -340,6 +340,10 @@ body {
     white-space: nowrap;
 }
 
+.tooltip b {
+    font-weight: bold;
+}
+
 /* ----------- Checkbox -----------  */
 #food-legend-area {
   position: absolute;
