@@ -36,7 +36,7 @@ print("列名:", df.columns.tolist())
 print("前5行数据:")
 print(df.head())
 
-# 创建TagGNI列，将2021年的数据除以361
+# 创建TagGNI列，将2021年的数据除以365
 # 首先处理".."值（缺失值），将其转换为NaN
 df['2021 [YR2021]'] = df['2021 [YR2021]'].replace('..', np.nan)
 
@@ -44,7 +44,7 @@ df['2021 [YR2021]'] = df['2021 [YR2021]'].replace('..', np.nan)
 df['2021 [YR2021]'] = pd.to_numeric(df['2021 [YR2021]'], errors='coerce')
 
 # 创建TagGNI列
-df['TagGNI'] = df['2021 [YR2021]'] / 361
+df['TagGNI'] = df['2021 [YR2021]'] / 365
 
 # 保存新的CSV文件
 df.to_csv('/Users/liburang/Documents/SoSe2025/PE2/foodcost/foodcost 2.0/foodcost2.0/data/GNI_with_TagGNI.csv', index=False)
