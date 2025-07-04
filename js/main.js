@@ -33,7 +33,7 @@ function renderTopArea(mode) {
   // main title
   let mainTitle = document.createElement("div");
   mainTitle.className = "main-title";
-  mainTitle.textContent = "Can Everyone Afford to Eat Healthy?";
+  mainTitle.textContent = "Global Cost of a Healthy Diet in 2021";
   topArea.appendChild(mainTitle);
 
   // left & right button container
@@ -698,8 +698,7 @@ function drawCountryCostChart(transitionMode) {
       });
       barIncome.addEventListener('mousemove', () => {
         const barRect = barIncome.getBoundingClientRect();
-        tooltip.style.left = `${barRect.right + 10}px`;
-        tooltip.style.top = `${barRect.top}px`;
+        positionTooltip(event, tooltip); 
       });
       barIncome.addEventListener('mouseleave', () => {
         tooltip.style.display = "none";
@@ -716,9 +715,7 @@ function drawCountryCostChart(transitionMode) {
         barCost.classList.add('active');
       });
       barCost.addEventListener('mousemove', () => {
-        const barRect = barCost.getBoundingClientRect();
-        tooltip.style.left = `${barRect.right + 10}px`;
-        tooltip.style.top = `${barRect.top}px`;
+        positionTooltip(event, tooltip);
       });
       barCost.addEventListener('mouseleave', () => {
         tooltip.style.display = "none";
@@ -863,13 +860,6 @@ function barToScatterUltraSmoothTransition() {
     return 'high';
   }
 
-  // 定义颜色
-  const incomeColors = {
-    low: 'rgba(253, 150, 179, 1)',     // 淡粉色 - 低收入
-    medium: 'rgba(2, 148, 123, 0.9)',  // 中粉色 - 中等收入  
-    high: 'rgba(2, 148, 123, 0.9)'      // 绿色 - 高收入
-  };
-
   // console.log("data", data); 
   const yAxisSpace = 60;
   const chartWidth = stageWidth - margin.left - margin.right - yAxisSpace;
@@ -935,7 +925,7 @@ function barToScatterUltraSmoothTransition() {
     }
   }
   // Y 
-  const yTicks = 5;
+  const yTicks = 3;
   for (let i = 0; i <= yTicks; i++) {
     const t = i / yTicks;
     // log
@@ -1013,7 +1003,6 @@ function barToScatterUltraSmoothTransition() {
       // 添加收入分类颜色
       const income = parseFloat(country["TagGNI"]);
       const category = getIncomeCategory(income);
-      bar.style.backgroundColor = incomeColors[category];
 
       bar.style.transition = "width 0.9s cubic-bezier(0.4, 0, 0.2, 1), height 0.9s cubic-bezier(0.4, 0, 0.2, 1), left 0.9s cubic-bezier(0.4, 0, 0.2, 1), top 0.9s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.9s cubic-bezier(0.4, 0, 0.2, 1)";
       document.querySelector("#renderer").appendChild(bar);
@@ -1129,7 +1118,6 @@ function barToScatterUltraSmoothTransition() {
     // 添加收入分类颜色
     const income = parseFloat(country["TagGNI"]);
     const category = getIncomeCategory(income);
-    dot.style.backgroundColor = incomeColors[category];
 
     dot.style.transition = "width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s cubic-bezier(0.4, 0, 0.2, 1), left 0.6s cubic-bezier(0.4, 0, 0.2, 1), top 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
     document.querySelector("#renderer").appendChild(dot);
@@ -1315,7 +1303,7 @@ function drawOverviewChart() {
   });
 
   // Vermeidung von Überlappungen durch Kraftfeldsimulation
-  function simulate(nodes, iterations = 300) {
+  function simulate(nodes, iterations = 200) {
     for (let iter = 0; iter < iterations; iter++) {
       for (let i = 0; i < nodes.length; i++) {
         let n1 = nodes[i];
@@ -1324,19 +1312,19 @@ function drawOverviewChart() {
           let dx = n2.x - n1.x;
           let dy = n2.y - n1.y;
           let dist = Math.sqrt(dx * dx + dy * dy);
-          let minDist = (n1.rCost + n2.rCost) / 2 + 8;
+          let minDist = (n1.rCost + n2.rCost) / 2 + 1;
           if (dist < minDist && dist > 0) {
             let move = (minDist - dist) / 2;
             let mx = (dx / dist) * move;
             let my = (dy / dist) * move;
             // n1.x -= mx;
             // n1.y -= my;
-            // n2.x += mx;
+            // // n2.x += mx;
             // n2.y += my;
             // n1.x -= mx;                      // <--- hier auskommentiert
-            n1.y -= my * 0.1;                   // <--- hier habe ich den Faktor 0.1 hinzugefügt
+            n1.y -= my * 0.5;                   // <--- hier habe ich den Faktor 0.1 hinzugefügt
             // n2.x += mx;                      // <--- hier auskommentiert
-            n2.y += my * 0.1;
+            n2.y += my * 0.5;
           }
         }
         // nicht aus dem Chartbereich heraus
@@ -1356,6 +1344,7 @@ function drawOverviewChart() {
   const mindiff = Math.min(...diffs);
   const maxdiff = Math.max(...diffs);
 
+  
   // Kreise
   nodes.forEach((node, index) => {
     let diff = Math.abs(node.ratio - 50);
@@ -1366,7 +1355,7 @@ function drawOverviewChart() {
       diff,
       mindiff,
       maxdiff,
-      1, 120
+      1, 80
     );
 
 
