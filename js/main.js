@@ -357,7 +357,7 @@ function drawCountryCostChart(transitionMode) {
         document.querySelector("#renderer").appendChild(bar);
 
         bar.addEventListener('mouseenter', (event) => {
-          tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>Total Cost: $${total.toFixed(2)}`;
+          tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>Total Cost: $${total.toFixed(2)} intl $/person/day (PPP, constant 2021)`;
           tooltip.style.display = "block";
           positionTooltip(event, tooltip);
           bar.classList.add('active');
@@ -385,7 +385,7 @@ function drawCountryCostChart(transitionMode) {
         barTopDiv.style.transition = "height 0.5s, top 0.5s";
 
         barTopDiv.addEventListener("mouseenter", (event) => {
-          tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>${selectedFoodKey}: $${value.toFixed(2)}`;
+          tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>${selectedFoodKey}: $${value.toFixed(2)} intl $/person/day (PPP, constant 2021)`;
           tooltip.style.display = "block";
           positionTooltip(event, tooltip);
           barTopDiv.classList.add('active');
@@ -418,7 +418,7 @@ function drawCountryCostChart(transitionMode) {
           seg.style.transition = "height 0.5s, top 0.5s";
 
           seg.addEventListener("mouseenter", (event) => {
-            tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>${food.key}: $${value.toFixed(2)}`;
+            tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>${food.key}: $${value.toFixed(2)} intl $/person/day (PPP, constant 2021)`;
             tooltip.style.display = "block";
             positionTooltip(event, tooltip);
           });
@@ -701,7 +701,7 @@ function drawCountryCostChart(transitionMode) {
 
       // Interaktion: cost
       barCost.addEventListener('mouseenter', () => {
-        tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>Cost: $${cost.toFixed(2)}`;
+        tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>Cost: $${cost.toFixed(2)} intl $/person/day (PPP, constant 2021)`;
         tooltip.style.display = "block";
         const barRect = barCost.getBoundingClientRect();
         tooltip.style.left = `${barRect.right + 10}px`;
@@ -783,7 +783,7 @@ function drawCountryCostChart(transitionMode) {
       bar.style.top = `${yPos}px`;
 
       bar.addEventListener('mouseenter', () => {
-        tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>$${cost.toFixed(2)}`;
+        tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>$${cost.toFixed(2)} intl $/person/day (PPP, constant 2021)`;
         tooltip.style.display = "block";
         positionTooltip(event, tooltip);
         bar.classList.add('active');
