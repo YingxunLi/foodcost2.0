@@ -1370,7 +1370,7 @@ function drawOverviewChart() {
 
     // tooltip Interaktion
     group.addEventListener("mouseenter", (event) => {
-      tooltip.innerHTML = `<b>${d["Country Name"]}</b><br>Income: $${parseFloat(d.TagGNI).toFixed(2)} Intl $/person/day (PPP, constant 2021)<br>Cost: $${parseFloat(d.Cost).toFixed(2)}<br>Malnutrition: ${parseFloat(d.Unterernährung).toFixed(2)}%<br>Ratio: ${ratio.toFixed(2)}%`;
+      tooltip.innerHTML = `<b>${d["Country Name"]}</b><br>Income: $${parseFloat(d.TagGNI).toFixed(2)} Intl $/person/day (PPP, constant 2021)<br>Cost: $${parseFloat(d.Cost).toFixed(2)} Intl $/person/day (PPP, constant 2021)<br>Malnutrition: ${parseFloat(d.Unterernährung).toFixed(2)}%<br>Ratio: ${ratio.toFixed(2)}%`;
       tooltip.style.display = "block";
       positionTooltip(event, tooltip);
       if (incomeCircle) incomeCircle.classList.add("hover");
