@@ -230,13 +230,6 @@ function drawCountryCostChart(transitionMode) {
     }));
     foodAverages.sort((a, b) => b.avg - a.avg);
 
-    // const baseColor = [253, 150, 179];    
-    // const minAlpha = 0.10, maxAlpha = 1;
-    // const alphas = foodAverages.map((_, i) =>
-    // minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
-    // );
-
-    // const alphas = [0.1, 0.186, 0.313, 0.486, 0.712, 1.0];
     const colors = [
       "hsl(343, 96%, 97.8%)",
       "hsl(343, 96%, 95%)",
@@ -263,7 +256,6 @@ function drawCountryCostChart(transitionMode) {
       },
       ...foodAverages.map((food, idx) => ({
         key: food.key,
-        // color: `rgba(${baseColor[0]},${baseColor[1]},${baseColor[2]},${alphas[idx]})`,
         color: colors[idx],
         selected: selectedFoodKey === food.key,
         onClick: () => {
@@ -322,13 +314,6 @@ function drawCountryCostChart(transitionMode) {
     }));
     foodAverages.sort((a, b) => b.avg - a.avg);
 
-    // const baseColor = [253, 150, 179]; 
-    // const minAlpha = 0.10, maxAlpha = 1;
-    // const alphas = foodAverages.map((_, i) =>
-    // minAlpha + (maxAlpha - minAlpha) * i / (foodAverages.length - 1)
-    // );
-
-    // const alphas = [0.1, 0.186, 0.313, 0.486, 0.712, 1.0];
     const colors = [
       "hsl(343, 96%, 97.8%)",
       "hsl(343, 96%, 95%)",
@@ -840,20 +825,6 @@ function barToScatterUltraSmoothTransition() {
   // Daten vorbereiten
   const data = getDataSortedByIncome();
 
-  // 收入分类
-  const incomes = data.map(d => parseFloat(d["TagGNI"]));
-  const minIncome = Math.min(...incomes);
-  const maxIncome = Math.max(...incomes);
-  // 三等分收入范围
-  const lowThreshold = minIncome + (maxIncome - minIncome) * 0.33;
-  const highThreshold = minIncome + (maxIncome - minIncome) * 0.67;
-
-  function getIncomeCategory(income) {
-    if (income <= lowThreshold) return 'low';
-    if (income <= highThreshold) return 'medium';
-    return 'high';
-  }
-
   // console.log("data", data); 
   const yAxisSpace = 60;
   const chartWidth = stageWidth - margin.left - margin.right - yAxisSpace;
@@ -918,6 +889,7 @@ function barToScatterUltraSmoothTransition() {
       document.querySelector("#renderer").appendChild(minorTick);
     }
   }
+
   // Y 
   const yTicks = 3;
   for (let i = 0; i <= yTicks; i++) {
@@ -993,11 +965,6 @@ function barToScatterUltraSmoothTransition() {
       bar.style.left = `${xPos}px`;
       bar.style.top = `${yPos}px`;
       bar.style.cursor = "pointer";
-
-      // 添加收入分类颜色
-      const income = parseFloat(country["TagGNI"]);
-      const category = getIncomeCategory(income);
-
       bar.style.transition = "width 0.9s cubic-bezier(0.4, 0, 0.2, 1), height 0.9s cubic-bezier(0.4, 0, 0.2, 1), left 0.9s cubic-bezier(0.4, 0, 0.2, 1), top 0.9s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.9s cubic-bezier(0.4, 0, 0.2, 1)";
       document.querySelector("#renderer").appendChild(bar);
       barDots.push(bar);
@@ -1109,10 +1076,6 @@ function barToScatterUltraSmoothTransition() {
     dot.style.width = `${prevR}px`;
     dot.style.height = `${prevR}px`;
     dot.style.cursor = "pointer";
-    // 添加收入分类颜色
-    const income = parseFloat(country["TagGNI"]);
-    const category = getIncomeCategory(income);
-
     dot.style.transition = "width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s cubic-bezier(0.4, 0, 0.2, 1), left 0.6s cubic-bezier(0.4, 0, 0.2, 1), top 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
     document.querySelector("#renderer").appendChild(dot);
     // dots.push({ dot, x, y, prevR, r });
