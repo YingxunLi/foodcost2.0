@@ -405,8 +405,8 @@ body {
 .overview-circle-unter {
     position: absolute;
     border-radius: 50%;
-    background: #6B7280;
-    opacity: 0.4;
+    background: #E1E5E8;
+    opacity: 0.5;
     pointer-events: none;
 }
 
@@ -417,6 +417,7 @@ body {
 }
 
 .overview-circle-unter.hover {
-    opacity: 1 !important;
+    background-color: #6B7C8D;
+    opacity: 0.2;
     z-index: 1001;
 }
