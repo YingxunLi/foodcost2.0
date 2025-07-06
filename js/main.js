@@ -247,7 +247,7 @@ function drawCountryCostChart(transitionMode) {
     legendArea.style.width = (stageWidth - margin.left - margin.right) + "px";
     const legendItems = [
       {
-        key: "Total Cost",
+        key: "Select All",
         selected: !selectedFoodKey,
         onClick: () => {
           selectedFoodKey = null;
@@ -342,7 +342,7 @@ function drawCountryCostChart(transitionMode) {
         document.querySelector("#renderer").appendChild(bar);
 
         bar.addEventListener('mouseenter', (event) => {
-          tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>Total Cost: $${total.toFixed(2)} intl $/person/day (PPP, constant 2021)`;
+          tooltip.innerHTML = `<b>${country["Country Name"]}</b><br>Select All: $${total.toFixed(2)} intl $/person/day (PPP, constant 2021)`;
           tooltip.style.display = "block";
           positionTooltip(event, tooltip);
           bar.classList.add('active');
